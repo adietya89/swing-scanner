@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 st.title("📈 Swing Trading Scanner")
-st.caption("Realtime update harian • Model mirip swing.budiyono.id")
+st.caption("Realtime update harian • INFEKSIUS ACTIO")
 
 # =====================
 # AUTO REFRESH (HARIAN)
@@ -168,3 +168,4 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
