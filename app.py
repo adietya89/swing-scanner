@@ -220,7 +220,6 @@ for _, row in df.iterrows():
     fig = plot_last_2_candles(row["_df"], row["Kode"])
     c6.pyplot(fig, clear_figure=True)
 )
-    st.subheader("🕯️ Candle Terakhir (2 Candle)")
 
 for _, row in df.iterrows():
     with st.expander(f"{row['Kode']} — {row['Candle']}"):
@@ -258,6 +257,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
