@@ -217,7 +217,6 @@ for _, row in df.iterrows():
     c9.write(row["SL"])
 
     # CANDLE LANGSUNG TAMPIL
-    st.subheader("🕯️ Candle Terakhir (2 Candle)")
     fig = plot_last_2_candles(row["_df"], row["Kode"])
     c6.pyplot(fig, clear_figure=True)
     
@@ -258,6 +257,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
