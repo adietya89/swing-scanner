@@ -54,21 +54,26 @@ SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 def S(x):
     return x.squeeze().astype(float)
 def plot_last_2_candles(df, kode):
-    df = df.tail(2)
+    df2 = df.tail(2)
 
     fig, ax = plt.subplots(figsize=(3, 2))
 
-    for i, row in enumerate(df.itertuples()):
-        color = "green" if row.Close >= row.Open else "red"
+    for i in range(len(df2)):
+        o = df2["Open"].iloc[i]
+        c = df2["Close"].iloc[i]
+        h = df2["High"].iloc[i]
+        l = df2["Low"].iloc[i]
+
+        color = "green" if c >= o else "red"
 
         # Wick
-        ax.plot([i, i], [row.Low, row.High], color=color, linewidth=1)
+        ax.plot([i, i], [l, h], color=color, linewidth=1)
 
         # Body
         ax.bar(
             i,
-            row.Close - row.Open,
-            bottom=row.Open,
+            c - o,
+            bottom=o,
             color=color,
             width=0.5
         )
@@ -216,6 +221,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
