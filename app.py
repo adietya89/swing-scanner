@@ -17,18 +17,20 @@ st.set_page_config(
 # =====================
 # HEADER IMAGE (LOGO + TITLE)
 # =====================
+import os
+from PIL import Image
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
+
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image(
-        "https://raw.githubusercontent.com/plotly/datasets/master/logo.png",
-        width=80
-    )
+    st.image(logo, width=80)
 
 with col2:
     st.title("📈 Swing Trading Scanner")
     st.caption("Realtime update harian • INFEKSIUS ACTIO")
-
 
 # =====================
 # AUTO REFRESH (HARIAN)
@@ -181,4 +183,5 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
