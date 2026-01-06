@@ -160,7 +160,7 @@ for t in TICKERS:
             "RSI": round(rsi, 1),
             "TP": round(tp, 2),
             "SL": round(sl, 2),
-            "Confidence": confidence
+            "Confidence": confidence,
             "_df": df.copy()
         })
 
@@ -216,6 +216,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
