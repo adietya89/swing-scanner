@@ -207,7 +207,7 @@ for _, row in df.iterrows():
         [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
     )
 
-    c1.write(row["Kode"])
+    c1.write(row["Kode"].replace(".JK", ""))
     c2.write(row["Harga"])
     c3.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
     c4.write(row["Trend"])
@@ -223,7 +223,7 @@ for _, row in df.iterrows():
     
 
 for _, row in df.iterrows():
-    with st.expander(f"{row['Kode']} — {row['Candle']}"):
+    with st.expander(f"{row['Kode'].replace('.JK','')} — {row['Candle']}"):
         fig = plot_last_2_candles(row["_df"], row["Kode"])
         st.pyplot(fig)
 
@@ -235,7 +235,7 @@ st.subheader("🎯 Confidence Meter")
 for _, row in df.iterrows():
     col1, col2 = st.columns([1, 4])
     with col1:
-        st.write(f"**{row['Kode']}**")
+        st.write(f"**{row['Kode'].replace('.JK','')}**")
         st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
     with col2:
         st.progress(row["Confidence"] / 4)
@@ -258,6 +258,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
