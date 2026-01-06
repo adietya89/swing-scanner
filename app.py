@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -52,7 +53,32 @@ SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 # =====================
 def S(x):
     return x.squeeze().astype(float)
+def plot_last_2_candles(df, kode):
+    df = df.tail(2)
 
+    fig, ax = plt.subplots(figsize=(3, 2))
+
+    for i, row in enumerate(df.itertuples()):
+        color = "green" if row.Close >= row.Open else "red"
+
+        # Wick
+        ax.plot([i, i], [row.Low, row.High], color=color, linewidth=1)
+
+        # Body
+        ax.bar(
+            i,
+            row.Close - row.Open,
+            bottom=row.Open,
+            color=color,
+            width=0.5
+        )
+
+    ax.set_title(kode, fontsize=9)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.grid(False)
+
+    return fig
 # =====================
 # LOGIC
 # =====================
@@ -135,6 +161,7 @@ for t in TICKERS:
             "TP": round(tp, 2),
             "SL": round(sl, 2),
             "Confidence": confidence
+            "_df": df.copy()
         })
 
     except Exception as e:
@@ -151,6 +178,12 @@ if df.empty:
     st.warning("Belum ada data")
 else:
     st.dataframe(df, use_container_width=True, hide_index=True)
+    st.subheader("🕯️ Candle Terakhir (2 Candle)")
+
+for _, row in df.iterrows():
+    with st.expander(f"{row['Kode']} — {row['Candle']}"):
+        fig = plot_last_2_candles(row["_df"], row["Kode"])
+        st.pyplot(fig)
 
 # =====================
 # CONFIDENCE METER
@@ -183,6 +216,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
