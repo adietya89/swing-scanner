@@ -31,7 +31,7 @@ with col1:
 
 with col2:
     st.title("📈 Swing Trading Scanner")
-    st.caption("Realtime update harian • INFEKSIUS ACTIO")
+    st.caption("Realtime update harian")
 
 # =====================
 # AUTO REFRESH (HARIAN)
@@ -177,12 +177,12 @@ df = pd.DataFrame(rows)
 # =====================
 # UI TABLE
 # =====================
-st.subheader("📊 Signal Saham")
+st.subheader("📊 • INFEKSIUS ACTIO")
 
 if df.empty:
     st.warning("Belum ada data")
 else:
-    st.subheader("📊 Signal Saham (Candle Langsung Tampil)")
+    st.subheader("🕯️Signal Saham ")
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9 = st.columns(
@@ -217,7 +217,7 @@ for _, row in df.iterrows():
     c9.write(row["SL"])
 
 # CANDLE LANGSUNG TAMPIL
-    st.subheader("🕯️ Candle Terakhir (2 Candle)")
+    st.subheader(" ")
     fig = plot_last_2_candles(row["_df"], row["Kode"])
     c6.pyplot(fig, clear_figure=True)
     
@@ -257,6 +257,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
