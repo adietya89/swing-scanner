@@ -15,14 +15,14 @@ st.set_page_config(
 )
 
 # =====================
-# HEADER IMAGE
+# HEADER IMAGE (LOGO + TITLE)
 # =====================
 col1, col2 = st.columns([1, 6])
 
 with col1:
     st.image(
         "https://raw.githubusercontent.com/plotly/datasets/master/logo.png",
-        width=100
+        width=80
     )
 
 with col2:
@@ -181,3 +181,4 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
