@@ -59,10 +59,10 @@ def plot_last_2_candles(df, kode):
     fig, ax = plt.subplots(figsize=(3, 2))
 
     for i in range(len(df2)):
-        o = df2["Open"].iloc[i]
-        c = df2["Close"].iloc[i]
-        h = df2["High"].iloc[i]
-        l = df2["Low"].iloc[i]
+        o = float(df2["Open"].iloc[i])
+        c = float(df2["Close"].iloc[i])
+        h = float(df2["High"].iloc[i])
+        l = float(df2["Low"].iloc[i])
 
         color = "green" if c >= o else "red"
 
@@ -221,6 +221,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
