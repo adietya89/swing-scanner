@@ -217,9 +217,11 @@ for _, row in df.iterrows():
     c9.write(row["SL"])
 
     # CANDLE LANGSUNG TAMPIL
+    st.subheader("🕯️ Candle Terakhir (2 Candle)")
     fig = plot_last_2_candles(row["_df"], row["Kode"])
     c6.pyplot(fig, clear_figure=True)
 )
+    
 
 for _, row in df.iterrows():
     with st.expander(f"{row['Kode']} — {row['Candle']}"):
