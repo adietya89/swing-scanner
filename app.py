@@ -26,7 +26,7 @@ logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
 col1, col2 = st.columns([2, 6])
 
 with col1:
-    st.image(logo, width=150)
+    st.image(logo, width=200)
 
 with col2:
     st.title("📈 Swing Trading Scanner")
@@ -183,6 +183,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
