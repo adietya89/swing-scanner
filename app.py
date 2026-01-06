@@ -182,7 +182,44 @@ st.subheader("📊 Signal Saham")
 if df.empty:
     st.warning("Belum ada data")
 else:
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.subheader("📊 Signal Saham (Candle Langsung Tampil)")
+
+# Header tabel
+h1, h2, h3, h4, h5, h6, h7, h8, h9 = st.columns(
+    [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
+)
+
+h1.markdown("**Kode**")
+h2.markdown("**Harga**")
+h3.markdown("**Signal**")
+h4.markdown("**Trend**")
+h5.markdown("**Zone**")
+h6.markdown("**Candle (2 terakhir)**")
+h7.markdown("**RSI**")
+h8.markdown("**TP**")
+h9.markdown("**SL**")
+
+st.divider()
+
+# Isi tabel
+for _, row in df.iterrows():
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns(
+        [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
+    )
+
+    c1.write(row["Kode"])
+    c2.write(row["Harga"])
+    c3.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
+    c4.write(row["Trend"])
+    c5.write(row["Zone"])
+    c7.write(row["RSI"])
+    c8.write(row["TP"])
+    c9.write(row["SL"])
+
+    # CANDLE LANGSUNG TAMPIL
+    fig = plot_last_2_candles(row["_df"], row["Kode"])
+    c6.pyplot(fig, clear_figure=True)
+)
     st.subheader("🕯️ Candle Terakhir (2 Candle)")
 
 for _, row in df.iterrows():
@@ -221,6 +258,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
