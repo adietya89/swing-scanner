@@ -90,8 +90,7 @@ def plot_last_2_candles(df, kode):
     
 ax.margins(0)
 plt.tight_layout(pad=0)
-
-    return fig
+return fig
 # =====================
 # LOGIC
 # =====================
@@ -275,6 +274,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
