@@ -279,7 +279,7 @@ for _, row in df.iterrows():
         norm_values = (close_values - min_val) / (max_val - min_val)
 
     # Step 5 – Buat DataFrame untuk Altair
-      data = pd.DataFrame({
+    data = pd.DataFrame({
         'index': range(len(norm_values)),
         'close': norm_values
     })
@@ -378,6 +378,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
