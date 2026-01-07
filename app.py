@@ -304,20 +304,30 @@ for _, row in df.iterrows():
     # Kolom 10 = Sparkline pakai Altair
     # ===================
     with c10:
-        data = pd.DataFrame({
-            'index': range(len(close)),
-            'close': close.values
-        })
-        chart = (
-            alt.Chart(data)
-            .mark_line(color="#5f88cc", strokeWidth=1.5)
-            .encode(
-                x=alt.X('index', axis=None),  # Hilangkan sumbu x
-                y=alt.Y('close', axis=None)   # Hilangkan sumbu y
-            )
-            .properties(height=30)  # Tinggi sparkline
+    close_values = close.values
+    # NORMALISASI: supaya sparkline terlihat
+    min_val = close_values.min()
+    max_val = close_values.max()
+    if max_val - min_val == 0:
+        norm_values = close_values  # jika flat, biarkan
+    else:
+        norm_values = (close_values - min_val) / (max_val - min_val)
+
+    data = pd.DataFrame({
+        'index': range(len(norm_values)),
+        'close': norm_values
+    })
+    
+    chart = (
+        alt.Chart(data)
+        .mark_line(color="#5f88cc", strokeWidth=1.5)
+        .encode(
+            x=alt.X('index', axis=None),
+            y=alt.Y('close', axis=None)  # hilangkan sumbu
         )
-        st.altair_chart(chart, use_container_width=True)
+        .properties(height=30)
+    )
+    st.altair_chart(chart, use_container_width=True)
         
 # =====================
 # CONFIDENCE METER
@@ -357,6 +367,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
