@@ -288,9 +288,7 @@ for _, row in df.iterrows():
 
     with c9.container(height=ROW_HEIGHT):
         st.write(row["SL"])
-    else:
-        c6.write("-")
-
+    
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -329,6 +327,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
