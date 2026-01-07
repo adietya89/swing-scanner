@@ -7,35 +7,33 @@ from ta.trend import EMAIndicator
 from ta.momentum import RSIIndicator
 from datetime import datetime
 def plot_last_2_candles(df):
-    df2 = df.tail(2)
+    df2 = df.tail(1)
 
-    fig, ax = plt.subplots(figsize=(0.45, 0.45), dpi=160)
+    fig, ax = plt.subplots(figsize=(0.35, 0.7), dpi=200)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].iloc[i])
-        c = float(df2["Close"].iloc[i])
-        h = float(df2["High"].iloc[i])
-        l = float(df2["Low"].iloc[i])
+        o = df2["Open"].iloc[i]
+        c = df2["Close"].iloc[i]
+        h = df2["High"].iloc[i]
+        l = df2["Low"].iloc[i]
 
-        color = "#00ff88" if c >= o else "#ff4d4d"
+       GREEN = "#00C176"
+RED   = "#FF4D4D"
 
-        # Wick
-        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
+color = GREEN if c >= o else RED
 
         # Body
-        ax.bar(
-            i,
-            abs(c - o),
-            bottom=min(o, c),
-            width=0.28,
-            color=color
+        ax.add_patch(
+            plt.Rectangle(
+                (0.43 + i*0.35, min(o, c)),
+                0.14,
+                abs(c - o),
+                color=color
+            )
         )
 
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_frame_on(False)
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    ax.set_xlim(0.3, 1.2)
+    ax.axis("off")
     return fig
 # =====================
 # PAGE CONFIG
@@ -225,7 +223,7 @@ else:
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9 = st.columns(
-    [1.2, 1, 1, 1, 1, 1.2, 1, 1, 1]
+    [1.2, 1, 1, 1, 1, 0.9, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
@@ -304,6 +302,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
