@@ -245,7 +245,7 @@ else:
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 5]
+    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
@@ -343,6 +343,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
