@@ -244,8 +244,8 @@ else:
     st.subheader("🕯️Signal Saham ")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7, h8, h9 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 5]
 )
 
 h1.markdown("**Kode**")
@@ -257,6 +257,7 @@ h6.markdown("**Candle**")
 h7.markdown("**RSI**")
 h8.markdown("**TP**")
 h9.markdown("**SL**")
+h9.markdown("**SPARK**")
 
 st.divider()
 
@@ -342,6 +343,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
