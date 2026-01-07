@@ -313,7 +313,7 @@ for _, row in df.iterrows():
             if max_val - min_val == 0:
                 norm_values = np.full_like(close_values, 0.5, dtype=float)
             else:
-                norm_values = (close_values - min_val) / (max_val - min_val)
+                norm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
                 mean_val = np.mean(norm_values)
                 norm_values = norm_values - mean_val + 0.5
                 norm_values = np.clip(norm_values, 0, 1)
@@ -376,6 +376,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
