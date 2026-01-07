@@ -273,24 +273,37 @@ for _, row in df.iterrows():
     # =====================
     # Kolom 1 - 9
     # =====================
-    with c1:
+   for _, row in df.iterrows():
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns(
+        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1]
+    )
+
+    with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
-    with c2:
+
+    with c2.container(height=ROW_HEIGHT):
         st.write(row["Harga"])
-    with c3:
-        st.write("🟢 BUY" if row["Signal"]=="BUY" else "⚪ HOLD")
-    with c4:
+
+    with c3.container(height=ROW_HEIGHT):
+        st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
+
+    with c4.container(height=ROW_HEIGHT):
         st.write(row["Trend"])
-    with c5:
+
+    with c5.container(height=ROW_HEIGHT):
         st.write(row["Zone"])
-    with c6:
+
+    with c6.container(height=ROW_HEIGHT):
         fig = plot_last_2_candles(row["_df"])
         st.pyplot(fig, clear_figure=True)
-    with c7:
+
+    with c7.container(height=ROW_HEIGHT):
         st.write(row["RSI"])
-    with c8:
+
+    with c8.container(height=ROW_HEIGHT):
         st.write(row["TP"])
-    with c9:
+
+    with c9.container(height=ROW_HEIGHT):
         st.write(row["SL"])
 
     # =====================
@@ -364,6 +377,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
