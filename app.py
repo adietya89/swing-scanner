@@ -7,23 +7,28 @@ from ta.trend import EMAIndicator
 from ta.momentum import RSIIndicator
 from datetime import datetime
 def plot_last_2_candles(df):
-    import matplotlib.pyplot as plt
+    df2 = df.tail(2)
 
-    df = df.tail(2)
+    fig, ax = plt.subplots(figsize=(1.3, 0.8))
 
-    fig, ax = plt.subplots(figsize=(1.6, 1.2))
+    for i in range(len(df2)):
+        o = float(df2["Open"].iloc[i])
+        c = float(df2["Close"].iloc[i])
+        h = float(df2["High"].iloc[i])
+        l = float(df2["Low"].iloc[i])
 
-    for i, (_, row) in enumerate(df.iterrows()):
-        color = "green" if row["Close"] >= row["Open"] else "red"
+        color = "green" if c >= o else "red"
 
-        ax.plot([i, i], [row["Low"], row["High"]], color=color, linewidth=1)
-        ax.add_patch(
-            plt.Rectangle(
-                (i - 0.25, min(row["Open"], row["Close"])),
-                0.5,
-                abs(row["Close"] - row["Open"]),
-                color=color
-            )
+        # Wick
+        ax.plot([i, i], [l, h], color=color, linewidth=0.8)
+
+        # Body
+        ax.bar(
+            i,
+            c - o,
+            bottom=o,
+            color=color,
+            width=0.35
         )
 
     ax.axis("off")
@@ -295,6 +300,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
