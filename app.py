@@ -272,10 +272,6 @@ for _, row in df.iterrows():
       # Step 1: Ambil data sparkline 90 hari
     close = S(row["_df"]["Close"]).tail(90) 
     close_values = close.to_numpy().squeeze()
-    
-    # Step 4 – Normalisasi
-      min_val = close_values.min()
-    max_val = close_values.max()
 
     if max_val - min_val == 0:
         norm_values = close_values  # kalau flat
@@ -343,7 +339,7 @@ for _, row in df.iterrows():
                 .properties(height=30)
          )
          st.altair_chart(chart, use_container_width=True)
-        
+   
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -382,6 +378,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
