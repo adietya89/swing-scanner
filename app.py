@@ -339,7 +339,16 @@ for _, row in df.iterrows():
                 .properties(height=30)
          )
          st.altair_chart(chart, use_container_width=True)
-   
+        # =========================
+        # Masukkan ke kolom Sparkline
+        # =========================
+        with c10:
+            st.altair_chart(chart, use_container_width=True)
+
+    except Exception as e:
+        # Kalau ada error, tampilkan placeholder
+        with c10:
+            st.write("-")
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -378,6 +387,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
