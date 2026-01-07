@@ -61,7 +61,7 @@ def S(x):
 def plot_last_2_candles(df, kode):
     df2 = df.tail(2)
 
-    fig, ax = plt.subplots(figsize=(1.5,1.0))
+    fig, ax = plt.subplots(figsize=(1.0, 0.8), dpi=120)
 
     for i in range(len(df2)):
         o = float(df2["Open"].iloc[i])
@@ -87,6 +87,9 @@ def plot_last_2_candles(df, kode):
     ax.set_xticks([])
     ax.set_yticks([])
     ax.grid(False)
+    
+ax.margins(0)
+plt.tight_layout(pad=0)
 
     return fig
 # =====================
@@ -227,7 +230,7 @@ for _, row in df.iterrows():
 # CANDLE LANGSUNG TAMPIL
     st.subheader(" ")
     fig = plot_last_2_candles(row["_df"], row["Kode"])
-    c6.pyplot(fig, clear_figure=True)
+    c6.pyplot(fig, clear_figure=True, use_container_width=False)
     
 for _, row in df.iterrows():
     with st.expander(f"{row['Kode'].replace('.JK','')} — {row['Candle']}"):
@@ -272,6 +275,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
