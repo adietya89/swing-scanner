@@ -345,7 +345,7 @@ for _, row in df.iterrows():
     with c10:
          st.altair_chart(chart, use_container_width=True)
 
-         except Exception as e:
+except Exception as e:
     # Kalau ada error, tampilkan placeholder
     with c10:
          st.write("-")
@@ -387,6 +387,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
