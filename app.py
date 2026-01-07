@@ -245,7 +245,7 @@ else:
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1]
+    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1.5]
 )
 
 h1.markdown("**Kode**")
@@ -264,8 +264,8 @@ st.divider()
 ROW_HEIGHT = 70
 # Isi tabel
 for _, row in df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10= st.columns(
-        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1.5]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9= st.columns(
+        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1]
     )
 
       # Step 1: Ambil data sparkline 14 hari
@@ -343,6 +343,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
