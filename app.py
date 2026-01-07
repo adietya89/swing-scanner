@@ -269,8 +269,8 @@ for _, row in df.iterrows():
         [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1.5]
     )
 
-      # Step 1: Ambil data sparkline 14 hari
-    close = S(row["_df"]["Close"]).tail(14) 
+      # Step 1: Ambil data sparkline 90 hari
+    close = S(row["_df"]["Close"]).tail(90) 
     
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
@@ -357,6 +357,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
