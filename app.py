@@ -263,10 +263,12 @@ st.divider()
 ROW_HEIGHT = 70
 # Isi tabel
 for _, row in df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns(
-        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10= st.columns(
+        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1.5]
     )
 
+     close = S(row["_df"]["Close"]).tail(14) 
+    
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
 
@@ -294,7 +296,13 @@ for _, row in df.iterrows():
 
     with c9.container(height=ROW_HEIGHT):
         st.write(row["SL"])
-    
+
+    # ===================
+    # Kolom 10 = Sparkline
+    # ===================
+    with c10.container(height=ROW_HEIGHT):
+        st.line_chart(close, use_container_width=True, height=30)
+        
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -333,6 +341,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
