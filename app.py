@@ -41,7 +41,12 @@ st.cache_data(ttl=60 * 60 * 24)
 # =====================
 # CONFIG
 # =====================
-TICKERS = ["BBRI.JK", "BBCA.JK", "BMRI.JK", "TLKM.JK", "ASII.JK"]
+@st.cache_data
+def load_idx_tickers():
+    df = pd.read_csv("idx_tickers.csv")
+    return (df["Kode"] + ".JK").tolist()
+
+TICKERS = load_idx_tickers()
 PERIOD = "6mo"
 INTERVAL = "1d"
 
@@ -257,6 +262,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
