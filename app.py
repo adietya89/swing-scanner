@@ -257,7 +257,7 @@ h6.markdown("**Candle**")
 h7.markdown("**RSI**")
 h8.markdown("**TP**")
 h9.markdown("**SL**")
-h10.markdown("**SPARK**")
+h10.markdown("**SPARKLINE**")
 
 st.divider()
 
@@ -343,6 +343,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
