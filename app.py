@@ -281,8 +281,8 @@ for _, row in df.iterrows():
     # Step 5 – Buat DataFrame untuk Altair
       data = pd.DataFrame({
         'index': range(len(norm_values)),
-        'close': norm_values
-      })
+        'close': norm_values})
+
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
 
@@ -378,6 +378,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
