@@ -311,15 +311,13 @@ for _, row in df.iterrows():
             min_val = close_values.min()
             max_val = close_values.max()
             if max_val - min_val == 0:
-                norm_values = np.zeros_like(close_values)
+                norm_values = np.full_like(close_values, 0.5)
             else:
-                norm_values = (close_values - min_val) / (max_val - min_val)
-            
-            norm_values_centered = norm_values - 0.5 + 0.5
-
+                nnorm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
+                     
             data = pd.DataFrame({
-                'index': range(len(norm_values_centered)),
-                'close': norm_values_centered
+                'index': range(len(norm_values)),
+                'close': norm_values
             })
 
             chart = (
@@ -333,8 +331,10 @@ for _, row in df.iterrows():
             )
 
             st.altair_chart(chart, use_container_width=True)
+            
         except Exception as e:
             st.write("-")
+            
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -373,6 +373,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
