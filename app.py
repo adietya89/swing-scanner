@@ -254,29 +254,40 @@ h9.markdown("**SL**")
 
 st.divider()
 
+ROW_HEIGHT = 70
 # Isi tabel
 for _, row in df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns(
-        [1.2, 1, 1, 1, 1, 1.2, 1, 1, 1]
+        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1]
     )
 
-    # Kode saham (tanpa .JK)
-    kode_bersih = row["Kode"].replace(".JK", "")
-    c1.write(kode_bersih)
+    with c1.container(height=ROW_HEIGHT):
+        st.write(row["Kode"].replace(".JK",""))
 
-    c2.write(row["Harga"])
-    c3.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
-    c4.write(row["Trend"])
-    c5.write(row["Zone"])
-    c7.write(row["RSI"])
-    c8.write(row["TP"])
-    c9.write(row["SL"])
+    with c2.container(height=ROW_HEIGHT):
+        st.write(row["Harga"])
 
-    # 🕯️ CANDLE LANGSUNG TAMPIL DI KOLOM
-    if row["_df"] is not None and len(row["_df"]) >= 2:
-        c6.markdown(f"<small>{kode_bersih}</small>", unsafe_allow_html=True)
+    with c3.container(height=ROW_HEIGHT):
+        st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
+
+    with c4.container(height=ROW_HEIGHT):
+        st.write(row["Trend"])
+
+    with c5.container(height=ROW_HEIGHT):
+        st.write(row["Zone"])
+
+    with c6.container(height=ROW_HEIGHT):
         fig = plot_last_2_candles(row["_df"])
-        c6.pyplot(fig, clear_figure=True)
+        st.pyplot(fig, clear_figure=True)
+
+    with c7.container(height=ROW_HEIGHT):
+        st.write(row["RSI"])
+
+    with c8.container(height=ROW_HEIGHT):
+        st.write(row["TP"])
+
+    with c9.container(height=ROW_HEIGHT):
+        st.write(row["SL"])
     else:
         c6.write("-")
 
@@ -318,6 +329,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
