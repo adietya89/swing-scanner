@@ -76,7 +76,11 @@ with col1:
 with col2:
     st.title("📈 Swing Trading Scanner")
     st.caption("Realtime update harian")
-
+    st.caption("Memasuki dinamika pasar tahun 2026, strategi swing trading memerlukan ketelitian dalam menangkap momentum harga. 
+    Screener ini hadir sebagai alat bantu untuk mempersempit pilihan saham yang menunjukkan potensi pembalikan arah atau kelanjutan tren. 
+    Namun, perlu diingat bahwa aplikasi hanyalah alat bantu teknis. Hasil screening ini bukanlah perintah beli;
+    tetap lakukan DYOR (Do Your Own Research) dan percayalah pada analisis mandiri menggunakan ilmu serta manajemen risiko yang Anda miliki")
+    
 # =====================
 # AUTO REFRESH (HARIAN)
 # =====================
@@ -327,6 +331,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
