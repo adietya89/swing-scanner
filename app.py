@@ -302,7 +302,6 @@ for _, row in df.iterrows():
     # Kolom 10 = Sparkline
     # ===================
     with c10.container(height=ROW_HEIGHT):
-        st.write(row["SPARK"])
         st.line_chart(close, use_container_width=True, height=30)
         
 # =====================
@@ -343,6 +342,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
