@@ -56,12 +56,10 @@ SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 # =====================
 # HELPER (ANTI ERROR)
 # =====================
-def S(x):
-    return x.squeeze().astype(float)
-def plot_last_2_candles(df, kode):
+def plot_last_2_candles(df):
     df2 = df.tail(2)
 
-    fig, ax = plt.subplots(figsize=(1.0, 0.8), dpi=120)
+    fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
 
     for i in range(len(df2)):
         o = float(df2["Open"].iloc[i])
@@ -69,17 +67,25 @@ def plot_last_2_candles(df, kode):
         h = float(df2["High"].iloc[i])
         l = float(df2["Low"].iloc[i])
 
-        color = "green" if c >= o else "red"
+        color = "#00ff88" if c >= o else "#ff4d4d"
 
-        ax.plot([i, i], [l, h], color=color, linewidth=0.8)
-        ax.bar(i, c - o, bottom=o, color=color, width=0.4)
+        # Wick
+        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
+
+        # Body
+        ax.bar(
+            i,
+            abs(c - o),
+            bottom=min(o, c),
+            width=0.35,
+            color=color
+        )
 
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.grid(False)
-    ax.margins(0)
+    ax.set_frame_on(False)
 
-    plt.tight_layout(pad=0)
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
 
 # =====================
@@ -187,7 +193,7 @@ else:
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9 = st.columns(
-    [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
+    [1.2, 1, 1, 1, 1, 1.2, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
@@ -265,6 +271,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
