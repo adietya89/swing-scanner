@@ -6,7 +6,28 @@ import numpy as np
 from ta.trend import EMAIndicator
 from ta.momentum import RSIIndicator
 from datetime import datetime
+def plot_last_2_candles(df):
+    import matplotlib.pyplot as plt
 
+    df = df.tail(2)
+
+    fig, ax = plt.subplots(figsize=(1.6, 1.2))
+
+    for i, (_, row) in enumerate(df.iterrows()):
+        color = "green" if row["Close"] >= row["Open"] else "red"
+
+        ax.plot([i, i], [row["Low"], row["High"]], color=color, linewidth=1)
+        ax.add_patch(
+            plt.Rectangle(
+                (i - 0.25, min(row["Open"], row["Close"])),
+                0.5,
+                abs(row["Close"] - row["Open"]),
+                color=color
+            )
+        )
+
+    ax.axis("off")
+    return fig
 # =====================
 # PAGE CONFIG
 # =====================
@@ -216,7 +237,10 @@ for _, row in df.iterrows():
         [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
     )
 
-    c1.write(row["Kode"].replace(".JK", ""))
+    # Kode saham (tanpa .JK)
+    kode_bersih = row["Kode"].replace(".JK", "")
+    c1.write(kode_bersih)
+
     c2.write(row["Harga"])
     c3.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
     c4.write(row["Trend"])
@@ -225,17 +249,13 @@ for _, row in df.iterrows():
     c8.write(row["TP"])
     c9.write(row["SL"])
 
-# 🕯️ candle
-    kode_bersih = row["Kode"].replace(".JK", "")
-c6.caption(kode_bersih)
-
-fig = plot_last_2_candles(row["_df"])
-c6.pyplot(fig, clear_figure=True, use_container_width=False)
-    
-for _, row in df.iterrows():
-    with st.expander(f"{row['Kode'].replace('.JK','')} — {row['Candle']}"):
+    # 🕯️ CANDLE LANGSUNG TAMPIL DI KOLOM
+    if row["_df"] is not None and len(row["_df"]) >= 2:
+        c6.caption(kode_bersih)
         fig = plot_last_2_candles(row["_df"])
-        st.pyplot(fig)
+        c6.pyplot(fig, clear_figure=True)
+    else:
+        c6.write("-")
 
 # =====================
 # CONFIDENCE METER
@@ -275,6 +295,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
