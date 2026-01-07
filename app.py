@@ -3,6 +3,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import altair as alt
 from ta.trend import EMAIndicator
 from ta.momentum import RSIIndicator
 from datetime import datetime
@@ -300,10 +301,23 @@ for _, row in df.iterrows():
         st.write(row["SL"])
 
     # ===================
-    # Kolom 10 = Sparkline
+    # Kolom 10 = Sparkline pakai Altair
     # ===================
-    with c10.container(height=ROW_HEIGHT):
-        st.line_chart(close, use_container_width=True, height=30)
+    with c10:
+        data = pd.DataFrame({
+            'index': range(len(close)),
+            'close': close.values
+        })
+        chart = (
+            alt.Chart(data)
+            .mark_line(color="#5f88cc", strokeWidth=1.5)
+            .encode(
+                x=alt.X('index', axis=None),  # Hilangkan sumbu x
+                y=alt.Y('close', axis=None)   # Hilangkan sumbu y
+            )
+            .properties(height=30)  # Tinggi sparkline
+        )
+        st.altair_chart(chart, use_container_width=True)
         
 # =====================
 # CONFIDENCE METER
@@ -343,6 +357,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
