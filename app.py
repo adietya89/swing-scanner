@@ -9,7 +9,7 @@ from datetime import datetime
 def plot_last_2_candles(df):
     df2 = df.tail(2)
 
-    fig, ax = plt.subplots(figsize=(1.3, 0.8))
+    fig, ax = plt.subplots(figsize=(0.45, 0.45), dpi=160)
 
     for i in range(len(df2)):
         o = float(df2["Open"].iloc[i])
@@ -17,21 +17,25 @@ def plot_last_2_candles(df):
         h = float(df2["High"].iloc[i])
         l = float(df2["Low"].iloc[i])
 
-        color = "green" if c >= o else "red"
+        color = "#00ff88" if c >= o else "#ff4d4d"
 
         # Wick
-        ax.plot([i, i], [l, h], color=color, linewidth=0.8)
+        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
 
         # Body
         ax.bar(
             i,
-            c - o,
-            bottom=o,
-            color=color,
-            width=0.35
+            abs(c - o),
+            bottom=min(o, c),
+            width=0.28,
+            color=color
         )
 
-    ax.axis("off")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_frame_on(False)
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
 # =====================
 # PAGE CONFIG
@@ -239,7 +243,7 @@ st.divider()
 # Isi tabel
 for _, row in df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9 = st.columns(
-        [1.2, 1, 1, 1, 1, 2, 1, 1, 1]
+        [1.2, 1, 1, 1, 1, 1.2, 1, 1, 1]
     )
 
     # Kode saham (tanpa .JK)
@@ -256,7 +260,7 @@ for _, row in df.iterrows():
 
     # 🕯️ CANDLE LANGSUNG TAMPIL DI KOLOM
     if row["_df"] is not None and len(row["_df"]) >= 2:
-        c6.caption(kode_bersih)
+        c6.markdown(f"<small>{kode_bersih}</small>", unsafe_allow_html=True)
         fig = plot_last_2_candles(row["_df"])
         c6.pyplot(fig, clear_figure=True)
     else:
@@ -300,6 +304,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
