@@ -270,7 +270,22 @@ for _, row in df.iterrows():
     )
 
       # Step 1: Ambil data sparkline 90 hari
-    close = S(row["_df"]["Close"]).tail(14) 
+    close = S(row["_df"]["Close"]).tail(90) 
+    close_values = close.to_numpy().squeeze()
+    
+    # Step 4 – Normalisasi
+      min_val = close_values.min()
+    max_val = close_values.max()
+
+    if max_val - min_val == 0:
+        norm_values = close_values  # kalau flat
+    else:
+        norm_values = (close_values - min_val) / (max_val - min_val)
+
+    # Step 5 – Buat DataFrame untuk Altair
+      data = pd.DataFrame({
+        'index': range(len(norm_values)),
+        'close': norm_values
     
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
@@ -367,6 +382,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
