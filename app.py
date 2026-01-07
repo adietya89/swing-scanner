@@ -345,7 +345,7 @@ try :
     with c10:
          st.altair_chart(chart, use_container_width=True)
 except Exception as e:
-  
+         st.write("-")
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -384,6 +384,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
