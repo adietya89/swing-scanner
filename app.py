@@ -178,7 +178,10 @@ for t in TICKERS:
         st.write(f"Error {t}: {e}")
 
 df = pd.DataFrame(rows)
-
+df = df.sort_values(
+    by=["Confidence", "Signal", "RSI"],
+    ascending=[False, False, True]
+)
 # =====================
 # UI TABLE
 # =====================
@@ -248,13 +251,20 @@ for _, row in df.iterrows():
 # =====================
 # BUY ONLY
 # =====================
-st.subheader("✅ BUY SIGNAL ONLY")
-buy_df = df[df["Signal"] == "BUY"]
+st.subheader("🔥 TOP BUY (Ranking Terkuat)")
 
-if buy_df.empty:
-    st.info("Belum ada BUY signal hari ini")
+top_buy = df[df["Signal"] == "BUY"].head(10)
+
+if top_buy.empty:
+    st.info("Belum ada BUY signal kuat hari ini")
 else:
-    st.dataframe(buy_df, use_container_width=True, hide_index=True)
+    st.dataframe(
+        top_buy[
+            ["Rank","Kode", "Harga", "Trend", "Zone", "Candle", "RSI", "TP", "SL", "Confidence"]
+        ],
+        use_container_width=True,
+        hide_index=True
+    )
 
 # =====================
 # FOOTER
@@ -262,6 +272,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
