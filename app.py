@@ -71,26 +71,17 @@ def plot_last_2_candles(df, kode):
 
         color = "green" if c >= o else "red"
 
-        # Wick
-        ax.plot([i, i], [l, h], color=color, linewidth=1)
+        ax.plot([i, i], [l, h], color=color, linewidth=0.8)
+        ax.bar(i, c - o, bottom=o, color=color, width=0.4)
 
-        # Body
-        ax.bar(
-            i,
-            c - o,
-            bottom=o,
-            color=color,
-            width=0.5
-        )
-
-    ax.set_title(kode, fontsize=9)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.grid(False)
-    
-ax.margins(0)
-plt.tight_layout(pad=0)
-return fig
+    ax.margins(0)
+
+    plt.tight_layout(pad=0)
+    return fig
+
 # =====================
 # LOGIC
 # =====================
@@ -274,6 +265,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
