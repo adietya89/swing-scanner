@@ -61,7 +61,7 @@ def S(x):
 def plot_last_2_candles(df, kode):
     df2 = df.tail(2)
 
-    fig, ax = plt.subplots(figsize=(3, 2))
+    fig, ax = plt.subplots(figsize=(1.5,1.0))
 
     for i in range(len(df2)):
         o = float(df2["Open"].iloc[i])
@@ -272,6 +272,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
