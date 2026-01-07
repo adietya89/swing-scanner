@@ -263,90 +263,69 @@ h10.markdown("**SPARKLINE**")
 st.divider()
 
 ROW_HEIGHT = 70
-# Isi tabel
+
 for _, row in df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10= st.columns(
+    # Buat 10 kolom
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 = st.columns(
         [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1.5]
     )
-with c10:
-  try :  
-    # Step 1: Ambil data sparkline 90 hari
-    close = S(row["_df"]["Close"]).tail(90) 
-    close_values = close.to_numpy().squeeze()
 
-    if max_val - min_val == 0:
-        norm_values = close_values  # kalau flat
-    else:
-        norm_values = (close_values - min_val) / (max_val - min_val)
-
-    # Step 5 – Buat DataFrame untuk Altair
-    data = pd.DataFrame({
-        'index': range(len(norm_values)),
-        'close': norm_values
-    })
-    with c1.container(height=ROW_HEIGHT):
+    # =====================
+    # Kolom 1 - 9
+    # =====================
+    with c1:
         st.write(row["Kode"].replace(".JK",""))
-
-    with c2.container(height=ROW_HEIGHT):
+    with c2:
         st.write(row["Harga"])
-
-    with c3.container(height=ROW_HEIGHT):
-        st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
-
-    with c4.container(height=ROW_HEIGHT):
+    with c3:
+        st.write("🟢 BUY" if row["Signal"]=="BUY" else "⚪ HOLD")
+    with c4:
         st.write(row["Trend"])
-
-    with c5.container(height=ROW_HEIGHT):
+    with c5:
         st.write(row["Zone"])
-
-    with c6.container(height=ROW_HEIGHT):
+    with c6:
         fig = plot_last_2_candles(row["_df"])
         st.pyplot(fig, clear_figure=True)
-
-    with c7.container(height=ROW_HEIGHT):
+    with c7:
         st.write(row["RSI"])
-
-    with c8.container(height=ROW_HEIGHT):
+    with c8:
         st.write(row["TP"])
-
-    with c9.container(height=ROW_HEIGHT):
+    with c9:
         st.write(row["SL"])
 
-    # ===================
-    # Kolom 10 = Sparkline pakai Altair
-    # ===================
+    # =====================
+    # Kolom 10 = Sparkline
+    # =====================
     with c10:
-         close_values = close.values
-         # NORMALISASI: supaya sparkline terlihat
-         min_val = close_values.min()
-         max_val = close_values.max()
-         if max_val - min_val == 0:
-            norm_values = close_values
-         else:
-              norm_values = (close_values - min_val) / (max_val - min_val)
+        try:
+            close = row["_df"]["Close"].tail(90)
+            close_values = close.to_numpy()
 
-         data = pd.DataFrame({
-              'index': range(len(norm_values)),
-              'close': norm_values
-         })
-    
-         chart = (
-               alt.Chart(data)
-               .mark_line(color="#5f88cc", strokeWidth=1.5)
-               .encode(
-                   x=alt.X('index', axis=None),
-                   y=alt.Y('close', axis=None)
+            min_val = close_values.min()
+            max_val = close_values.max()
+            if max_val - min_val == 0:
+                norm_values = close_values
+            else:
+                norm_values = (close_values - min_val) / (max_val - min_val)
+
+            data = pd.DataFrame({
+                'index': range(len(norm_values)),
+                'close': norm_values
+            })
+
+            chart = (
+                alt.Chart(data)
+                .mark_line(color="#5f88cc", strokeWidth=1.5)
+                .encode(
+                    x=alt.X('index', axis=None),
+                    y=alt.Y('close', axis=None)
                 )
                 .properties(height=30)
-         )
-         st.altair_chart(chart, use_container_width=True)
-        # =========================
-        # Masukkan ke kolom Sparkline
-        # =========================
-    with c10:
-         st.altair_chart(chart, use_container_width=True)
-  except Exception as e:
-         st.write("-")
+            )
+
+            st.altair_chart(chart, use_container_width=True)
+        except Exception as e:
+            st.write("-")
 # =====================
 # CONFIDENCE METER
 # =====================
@@ -385,6 +364,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
