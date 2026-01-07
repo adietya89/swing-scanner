@@ -311,13 +311,15 @@ for _, row in df.iterrows():
             min_val = close_values.min()
             max_val = close_values.max()
             if max_val - min_val == 0:
-                norm_values = close_values
+                norm_values = np.zeros_like(close_values)
             else:
                 norm_values = (close_values - min_val) / (max_val - min_val)
+            
+            norm_values_centered = norm_values - 0.5 + 0.5
 
             data = pd.DataFrame({
-                'index': range(len(norm_values)),
-                'close': norm_values
+                'index': range(len(norm_values_centered)),
+                'close': norm_values_centered
             })
 
             chart = (
@@ -325,7 +327,7 @@ for _, row in df.iterrows():
                 .mark_line(color="#5f88cc", strokeWidth=1.5)
                 .encode(
                     x=alt.X('index', axis=None),
-                    y=alt.Y('close', axis=None)
+                    y=alt.Y('close', axis=None, scale=alt.Scale(domain=[0,1]))
                 )
                 .properties(height=30)
             )
@@ -371,6 +373,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
