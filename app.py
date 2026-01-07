@@ -226,9 +226,11 @@ for _, row in df.iterrows():
     c9.write(row["SL"])
 
 # CANDLE LANGSUNG TAMPIL
-    st.subheader(" ")
-    fig = plot_last_2_candles(row["_df"], row["Kode"])
-    c6.pyplot(fig, clear_figure=True, use_container_width=False)
+    kode_bersih = row["Kode"].replace(".JK", "")
+c6.caption(kode_bersih)
+
+fig = plot_last_2_candles(row["_df"])
+c6.pyplot(fig, clear_figure=True, use_container_width=False)
     
 for _, row in df.iterrows():
     with st.expander(f"{row['Kode'].replace('.JK','')} — {row['Candle']}"):
@@ -273,6 +275,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
