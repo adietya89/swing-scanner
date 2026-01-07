@@ -306,7 +306,7 @@ for _, row in df.iterrows():
     with c10:
         try:
             close = row["_df"]["Close"].tail(90)
-            close_values = close.to_numpy()
+            close_values = close.squeeze().to_numpy()
 
             min_val = close_values.min()
             max_val = close_values.max()
@@ -371,6 +371,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
