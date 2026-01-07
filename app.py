@@ -199,7 +199,7 @@ h2.markdown("**Harga**")
 h3.markdown("**Signal**")
 h4.markdown("**Trend**")
 h5.markdown("**Zone**")
-h6.markdown("**Candle (2 terakhir)**")
+h6.markdown("**Candle**")
 h7.markdown("**RSI**")
 h8.markdown("**TP**")
 h9.markdown("**SL**")
@@ -262,6 +262,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
