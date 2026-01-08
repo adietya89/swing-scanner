@@ -159,15 +159,22 @@ def plot_last_2_candles(df):
         ax.axis("off")
         return fig
 
-    # Ambil angka murni
-    opens = df2["Open"].to_numpy(dtype=float)
-    closes = df2["Close"].to_numpy(dtype=float)
-    highs = df2["High"].to_numpy(dtype=float)
-    lows = df2["Low"].to_numpy(dtype=float)
+    # Ambil angka murni, pastikan 1D float
+    opens = df2["Open"].to_numpy(dtype=float).flatten()
+    closes = df2["Close"].to_numpy(dtype=float).flatten()
+    highs = df2["High"].to_numpy(dtype=float).flatten()
+    lows = df2["Low"].to_numpy(dtype=float).flatten()
+
+    # Jika kurang dari 2 candlestick, ulang baris terakhir
+    if len(df2) < 2:
+        opens = np.pad(opens, (2 - len(opens), 0), mode='edge')
+        closes = np.pad(closes, (2 - len(closes), 0), mode='edge')
+        highs = np.pad(highs, (2 - len(highs), 0), mode='edge')
+        lows = np.pad(lows, (2 - len(lows), 0), mode='edge')
 
     fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
 
-    for i in range(len(df2)):
+    for i in range(2):
         o, c, h, l = opens[i], closes[i], highs[i], lows[i]
         color = "#00C176" if c >= o else "#FF4D4D"
 
@@ -186,7 +193,7 @@ def plot_last_2_candles(df):
     # Axis off & batasan
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlim(-0.6, len(df2)-0.4)
+    ax.set_xlim(-0.6, 1.4)
     ax.set_ylim(min(lows)*0.995, max(highs)*1.005)
     ax.set_frame_on(False)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
@@ -545,6 +552,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
