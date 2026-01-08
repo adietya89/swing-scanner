@@ -339,12 +339,12 @@ for _, row in df.iterrows():
         st.write(row["MA_Pos"])
         
     with c8.container(height=ROW_HEIGHT):
-    if row["MACD"] == "Golden Cross":
-        st.success("Golden Cross")
-    elif row["MACD"] == "Death Cross":
-        st.error("Death Cross")
-    else:
-        st.write("Normal")
+        if row["MACD"] == "Golden Cross":
+           st.success("Golden Cross")
+        elif row["MACD"] == "Death Cross":
+           st.error("Death Cross")
+        else:
+           st.write("Normal")
 
     with c9.container(height=ROW_HEIGHT):
         st.write(row["RSI"])
@@ -431,6 +431,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
