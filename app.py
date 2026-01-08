@@ -93,6 +93,7 @@ st.cache_data(ttl=60 * 60 * 24)
 # CONFIG
 # =====================
 @st.cache_data
+st.cache_data.clear()
 def load_idx_tickers():
     df = pd.read_csv("idx_tickers.csv")
     return (df["Kode"] + ".JK").tolist()
@@ -261,6 +262,7 @@ for t in TICKERS:
             "Candle": candle,
             "RSI": round(rsi, 1),
             "MA_Pos": ma_pos,
+            "MACD": macd_signal,
             "TP": round(tp, 2),
             "SL": round(sl, 2),
             "Confidence": confidence,
@@ -431,6 +433,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
