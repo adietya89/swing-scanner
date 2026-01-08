@@ -17,50 +17,36 @@ from PIL import Image
 import os
 
 def plot_last_2_candles(df):
-    df2 = df.tail(2)  # 2 candle seperti contoh
+    df2 = df.tail(2)
 
-    GREEN = "#00C176"
-    RED = "#FF4D4D"
-
-    fig, ax = plt.subplots(figsize=(0.35, 0.8), dpi=220)
-
-    base_x = 0
-    gap = 0.35
+    fig, ax = plt.subplots(figsize=(0.45, 0.9), dpi=200)
 
     for i in range(len(df2)):
-        o = df2["Open"].iloc[i]
-        c = df2["Close"].iloc[i]
-        h = df2["High"].iloc[i]
-        l = df2["Low"].iloc[i]
+        o = float(df2["Open"].iloc[i])
+        c = float(df2["Close"].iloc[i])
+        h = float(df2["High"].iloc[i])
+        l = float(df2["Low"].iloc[i])
 
-        # 🔥 NORMALISASI (INI KUNCI)
-        total = h - l if h != l else 1
-        o_n = (o - l) / total * 100
-        c_n = (c - l) / total * 100
-        h_n = 100
-        l_n = 0
+        color = "#00C176" if c >= o else "#FF4D4D"
 
-        color = GREEN if c >= o else RED
-        x = base_x + i * gap
+        ax.plot([i, i], [l, h], color=color, linewidth=1.1)
 
-        # Wick
-        ax.plot([x, x], [l_n, h_n], color=color, linewidth=1.1)
-
-        # Body
-        ax.add_patch(
-            plt.Rectangle(
-                (x - 0.07, min(o_n, c_n)),
-                0.14,
-                abs(c_n - o_n),
-                color=color
-            )
+        ax.bar(
+            i,
+            abs(c - o),
+            bottom=min(o, c),
+            width=0.28,
+            color=color
         )
 
-    ax.set_xlim(-0.2, gap * len(df2))
-    ax.set_ylim(-5, 105)
+    ax.set_xlim(-0.6, 1.6)
+    ax.set_ylim(df2["Low"].min() * 0.995, df2["High"].max() * 1.005)
+
     ax.axis("off")
+    plt.tight_layout(pad=0)
 
     return fig
+
 # =====================
 # PAGE CONFIG
 # =====================
@@ -340,7 +326,7 @@ h12.markdown("**SPARKLINE**")
 
 st.divider()
 
-ROW_HEIGHT = 70
+ROW_HEIGHT = 90
 
 # =====================
 # Kolom 1 - 9
@@ -506,6 +492,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
