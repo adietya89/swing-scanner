@@ -60,6 +60,11 @@ st.markdown("""
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
+.header-box {
+    background: linear-gradient(135deg, #0e1117, #151b2c);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 25px;
 [data-testid="stMetric"] {
     background-color: #0e1117;
     padding: 12px;
@@ -83,10 +88,39 @@ logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
 col1, col2 = st.columns([1, 7])
 
 with col1:
-    st.image(logo, width=160)
+    st.markdown(
+        """
+        <div style="
+            background-color: white;
+            padding: 10px;
+            border-radius: 12px;
+        ">
+        """,
+        unsafe_allow_html=True
+    )
+    st.image(logo, width=140)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with col2:
-    st.markdown("## 📈 **Swing Trading Scanner**")
+    st.markdown(
+        """
+        <h1 style="
+            color: white;
+            font-weight: 800;
+            margin-bottom: 4px;
+        ">
+        📈 Swing Trading Scanner
+        </h1>
+
+        <p style="
+            color: #9aa0a6;
+            font-size: 14px;
+        ">
+        Realtime Daily Market Screening • Indonesia Stock Exchange
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
     st.caption("Realtime Daily Market Screening • Indonesia Stock Exchange")
     st.caption(
     "Memasuki dinamika pasar tahun 2026, strategi swing trading memerlukan ketelitian dalam menangkap momentum harga. "
@@ -507,6 +541,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
