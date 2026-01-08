@@ -4,7 +4,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import altair as alt
-from ta.trend import EMAIndicator
+from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from datetime import datetime
 def plot_last_2_candles(df):
@@ -144,6 +144,23 @@ def plot_last_2_candles(df):
 # =====================
 # LOGIC
 # =====================
+def detect_macd_signal(close):
+    macd = MACD(close)
+    macd_line = macd.macd()
+    signal_line = macd.macd_signal()
+
+    prev_macd = macd_line.iloc[-2]
+    prev_signal = signal_line.iloc[-2]
+    curr_macd = macd_line.iloc[-1]
+    curr_signal = signal_line.iloc[-1]
+
+    if prev_macd < prev_signal and curr_macd > curr_signal:
+        return "Golden Cross"
+    elif prev_macd > prev_signal and curr_macd < curr_signal:
+        return "Death Cross"
+    else:
+        return "Normal"
+
 def detect_ma_position(close):
     mas = {
         "MA5": 5,
@@ -216,6 +233,7 @@ for t in TICKERS:
         df = df.dropna()
         close = S(df["Close"])
         price = close.iloc[-1]
+        macd_signal = detect_macd_signal(close)
         ma_pos = detect_ma_position(close)
 
         trend = detect_trend(close)
@@ -268,8 +286,8 @@ else:
     st.subheader("🕯️Signal Saham ")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
@@ -279,10 +297,11 @@ h4.markdown("**Trend**")
 h5.markdown("**Zone**")
 h6.markdown("**Candle**")
 h7.markdown("**MA >**")
-h8.markdown("**RSI**")
-h9.markdown("**TP**")
-h10.markdown("**SL**")
-h11.markdown("**SPARKLINE**")
+h8.markdown("**MACD**")
+h9.markdown("**RSI**")
+h10.markdown("**TP**")
+h11.markdown("**SL**")
+h12.markdown("**SPARKLINE**")
 
 st.divider()
 
@@ -292,9 +311,10 @@ ROW_HEIGHT = 70
     # Kolom 1 - 9
     # =====================
 for _, row in df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1, 1, 1, 1]
     )
+
  
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
@@ -317,20 +337,28 @@ for _, row in df.iterrows():
         
     with c7.container(height=ROW_HEIGHT):
         st.write(row["MA_Pos"])
-
+        
     with c8.container(height=ROW_HEIGHT):
-        st.write(row["RSI"])
+    if row["MACD"] == "Golden Cross":
+        st.success("Golden Cross")
+    elif row["MACD"] == "Death Cross":
+        st.error("Death Cross")
+    else:
+        st.write("Normal")
 
     with c9.container(height=ROW_HEIGHT):
-        st.write(row["TP"])
+        st.write(row["RSI"])
 
     with c10.container(height=ROW_HEIGHT):
+        st.write(row["TP"])
+
+    with c11.container(height=ROW_HEIGHT):
         st.write(row["SL"])
 
     # =====================
-    # Kolom 11 = Sparkline
+    # Kolom 12 = Sparkline
     # =====================
-    with c11:
+    with c12:
         try:
             close = row["_df"]["Close"].tail(90)
             close_values = close.squeeze().to_numpy()
@@ -403,5 +431,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
