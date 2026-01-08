@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 import yfinance as yf
+import ta
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -433,6 +434,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
