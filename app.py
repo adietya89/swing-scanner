@@ -17,9 +17,15 @@ from PIL import Image
 import os
 
 def plot_last_2_candles(df):
+    df = df.copy()
+
+    # pastikan kolom bukan multi-index
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
     df2 = df.tail(2)
 
-    fig, ax = plt.subplots(figsize=(0.45, 0.9), dpi=200)
+    fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
 
     for i in range(len(df2)):
         o = float(df2["Open"].iloc[i])
@@ -27,24 +33,16 @@ def plot_last_2_candles(df):
         h = float(df2["High"].iloc[i])
         l = float(df2["Low"].iloc[i])
 
-        color = "#00C176" if c >= o else "#FF4D4D"
+        color = "#00ff88" if c >= o else "#ff4d4d"
 
-        ax.plot([i, i], [l, h], color=color, linewidth=1.1)
+        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
+        ax.bar(i, abs(c - o), bottom=min(o, c), width=0.35, color=color)
 
-        ax.bar(
-            i,
-            abs(c - o),
-            bottom=min(o, c),
-            width=0.28,
-            color=color
-        )
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_frame_on(False)
 
-    ax.set_xlim(-0.6, 1.6)
-    ax.set_ylim(df2["Low"].min() * 0.995, df2["High"].max() * 1.005)
-
-    ax.axis("off")
     plt.tight_layout(pad=0)
-
     return fig
 
 # =====================
@@ -530,7 +528,7 @@ if top_buy.empty:
 else:
     st.dataframe(
         top_buy[
-            ["Rank","Kode", "Harga", "Trend", "Zone", "Candle", "RSI", "TP", "SL", "Confidence"]
+            ["Kode", "Harga", "Trend", "Zone", "Candle", "RSI", "TP", "SL", "Confidence"]
         ],
         use_container_width=True,
         hide_index=True
@@ -542,6 +540,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
