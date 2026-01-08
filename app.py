@@ -16,41 +16,6 @@ from datetime import datetime
 from PIL import Image
 import os
 
-def plot_last_2_candles(df):
-    df = df.copy()
-
-    # flatten kolom kalau dobel
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-
-    df2 = df.tail(2)
-
-    fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
-
-    for i in range(len(df2)):
-        o = float(df2["Open"].to_numpy()[i])
-        c = float(df2["Close"].to_numpy()[i])
-        h = float(df2["High"].to_numpy()[i])
-        l = float(df2["Low"].to_numpy()[i])
-
-        color = "#00ff88" if c >= o else "#ff4d4d"
-
-        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
-        ax.bar(
-            i,
-            abs(c - o),
-            bottom=min(o, c),
-            width=0.35,
-            color=color
-        )
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_frame_on(False)
-    plt.tight_layout(pad=0)
-
-    return fig
-
 # =====================
 # PAGE CONFIG
 # =====================
@@ -162,22 +127,25 @@ def S(x):
     return x.astype(float)
     
 def plot_last_2_candles(df):
+    df = df.copy()
+
+    # pastikan kolom flat
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
     df2 = df.tail(2)
 
     fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].iloc[i])
-        c = float(df2["Close"].iloc[i])
-        h = float(df2["High"].iloc[i])
-        l = float(df2["Low"].iloc[i])
+        o = float(df2["Open"].to_numpy()[i])
+        c = float(df2["Close"].to_numpy()[i])
+        h = float(df2["High"].to_numpy()[i])
+        l = float(df2["Low"].to_numpy()[i])
 
         color = "#00ff88" if c >= o else "#ff4d4d"
 
-        # Wick
         ax.plot([i, i], [l, h], color=color, linewidth=0.6)
-
-        # Body
         ax.bar(
             i,
             abs(c - o),
@@ -186,11 +154,8 @@ def plot_last_2_candles(df):
             color=color
         )
 
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_frame_on(False)
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    ax.axis("off")
+    plt.tight_layout(pad=0)
     return fig
 
 # =====================
@@ -545,6 +510,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
