@@ -337,7 +337,7 @@ for _, row in df.iterrows():
         st.pyplot(fig, clear_figure=True)
 
     with c7.container(height=ROW_HEIGHT):
-    st.write(row["Candle_Pattern"])
+        st.write(row["Candle_Pattern"])
 
     with c8.container(height=ROW_HEIGHT):
         st.write(row["RSI"])
@@ -424,6 +424,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
