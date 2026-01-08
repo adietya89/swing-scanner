@@ -131,12 +131,24 @@ def plot_last_2_candles(df):
     Plot 2 candlestick terakhir yang valid (OHLC numeric, tidak NaN).
     Ukuran plot disesuaikan agar jelas di Streamlit.
     """
-    # Pastikan kolom OHLC numeric
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    # Pastikan df adalah DataFrame
+    if not isinstance(df, pd.DataFrame):
+        return plt.figure()  # kosong kalau bukan DataFrame
+
     df = df.copy()
+
+    # Pastikan kolom OHLC ada
+    for col in ["Open", "Close", "High", "Low"]:
+        if col not in df.columns:
+            df[col] = pd.NA  # isi NA kalau kolom tidak ada
+
+    # Ambil 10 baris terakhir, ubah ke numeric, drop yang gagal
     for col in ["Open", "Close", "High", "Low"]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-    
-    # Ambil 10 baris terakhir, kemudian pilih 2 yang valid
+
     df2 = df.tail(10).dropna(subset=["Open", "Close", "High", "Low"]).tail(2)
 
     if len(df2) == 0:
@@ -149,10 +161,10 @@ def plot_last_2_candles(df):
     fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].to_numpy()[i])
-        c = float(df2["Close"].to_numpy()[i])
-        h = float(df2["High"].to_numpy()[i])
-        l = float(df2["Low"].to_numpy()[i])
+        o = float(df2["Open"].iloc[i])
+        c = float(df2["Close"].iloc[i])
+        h = float(df2["High"].iloc[i])
+        l = float(df2["Low"].iloc[i])
 
         color = "#00C176" if c >= o else "#FF4D4D"
 
@@ -530,6 +542,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
