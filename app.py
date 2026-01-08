@@ -144,6 +144,48 @@ def plot_last_2_candles(df):
 # =====================
 # LOGIC
 # =====================
+def detect_candle_pattern(df):
+    if len(df) < 2:
+        return "-"
+
+    o1, c1 = df["Open"].iloc[-2], df["Close"].iloc[-2]
+    o2, c2 = df["Open"].iloc[-1], df["Close"].iloc[-1]
+    h2, l2 = df["High"].iloc[-1], df["Low"].iloc[-1]
+
+    body2 = abs(c2 - o2)
+    range2 = h2 - l2 if h2 != l2 else 1
+    lower_wick = min(o2, c2) - l2
+    upper_wick = h2 - max(o2, c2)
+
+    # ===== SINGLE CANDLE =====
+    if body2 / range2 < 0.1:
+        return "Doji"
+
+    if lower_wick > body2 * 2 and upper_wick < body2:
+        return "Hammer"
+
+    if upper_wick > body2 * 2 and lower_wick < body2:
+        return "Shooting Star"
+
+    # ===== TWO CANDLE =====
+    # Bullish Engulfing
+    if c1 < o1 and c2 > o2 and c2 > o1 and o2 < c1:
+        return "Bullish Engulfing"
+
+    # Bearish Engulfing
+    if c1 > o1 and c2 < o2 and c2 < o1 and o2 > c1:
+        return "Bearish Engulfing"
+
+    # Bullish Harami
+    if c1 < o1 and c2 > o2 and c2 < o1 and o2 > c1:
+        return "Bullish Harami"
+
+    # Bearish Harami
+    if c1 > o1 and c2 < o2 and c2 > o1 and o2 < c1:
+        return "Bearish Harami"
+
+    return "-"
+
 def detect_trend(close):
     ema20 = EMAIndicator(close, 20).ema_indicator()
     ema50 = EMAIndicator(close, 50).ema_indicator()
@@ -199,6 +241,7 @@ for t in TICKERS:
         trend = detect_trend(close)
         zone = detect_zone(df)
         candle, bias = detect_candle(df)
+        pattern = detect_candle_pattern(df)
         rsi = RSIIndicator(close, 14).rsi().iloc[-1]
 
         signal = build_signal(zone, bias, trend)
@@ -219,6 +262,7 @@ for t in TICKERS:
             "Trend": trend,
             "Zone": zone,
             "Candle": candle,
+            "Candle_Pattern": pattern,
             "RSI": round(rsi, 1),
             "TP": round(tp, 2),
             "SL": round(sl, 2),
@@ -245,8 +289,8 @@ else:
     st.subheader("🕯️Signal Saham ")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7, h8, h9, h10 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1, 1.3]
 )
 
 h1.markdown("**Kode**")
@@ -255,10 +299,11 @@ h3.markdown("**Signal**")
 h4.markdown("**Trend**")
 h5.markdown("**Zone**")
 h6.markdown("**Candle**")
-h7.markdown("**RSI**")
-h8.markdown("**TP**")
-h9.markdown("**SL**")
-h10.markdown("**SPARKLINE**")
+h7.markdown("**Candle Pattern**")
+h8.markdown("**RSI**")
+h9.markdown("**TP**")
+h10.markdown("**SL**")
+h11.markdown("**SPARKLINE**")
 
 st.divider()
 
@@ -268,8 +313,8 @@ ROW_HEIGHT = 70
     # Kolom 1 - 9
     # =====================
 for _, row in df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10= st.columns(
-        [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1, 1, 1, 1, 1.3]
     )
 
     with c1.container(height=ROW_HEIGHT):
@@ -292,18 +337,21 @@ for _, row in df.iterrows():
         st.pyplot(fig, clear_figure=True)
 
     with c7.container(height=ROW_HEIGHT):
-        st.write(row["RSI"])
+    st.write(row["Candle_Pattern"])
 
     with c8.container(height=ROW_HEIGHT):
-        st.write(row["TP"])
+        st.write(row["RSI"])
 
     with c9.container(height=ROW_HEIGHT):
+        st.write(row["TP"])
+
+    with c10.container(height=ROW_HEIGHT):
         st.write(row["SL"])
 
     # =====================
     # Kolom 10 = Sparkline
     # =====================
-    with c10:
+    with c11:
         try:
             close = row["_df"]["Close"].tail(90)
             close_values = close.squeeze().to_numpy()
@@ -376,6 +424,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
