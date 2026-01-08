@@ -242,7 +242,7 @@ for t in TICKERS:
         zone = detect_zone(df)
         candle, bias = detect_candle(df)
         pattern = detect_candle_pattern(df)
-        rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+        rsi = float(RSIIndicator(close, 14).rsi().iloc[-1])
 
         signal = build_signal(zone, bias, trend)
 
@@ -266,7 +266,7 @@ for t in TICKERS:
             "RSI": round(rsi, 1),
             "TP": round(tp, 2),
             "SL": round(sl, 2),
-            "Confidence": 0,
+            "Confidence": confidence,
             "_df": df.copy()
         })
 
@@ -275,9 +275,12 @@ for t in TICKERS:
 
 df = pd.DataFrame(rows)
 df = df.sort_values(
-    by=["Signal", "RSI"],
+    by=["Confidence", "RSI"],
     ascending=[False, True]
-)
+).reset_index(drop=True)
+
+df["Rank"] = df.index + 1
+
 # =====================
 # UI TABLE
 # =====================
@@ -424,6 +427,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
