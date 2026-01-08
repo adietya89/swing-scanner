@@ -19,7 +19,7 @@ import os
 def plot_last_2_candles(df):
     df = df.copy()
 
-    # paksa flatten kolom
+    # flatten kolom kalau dobel
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
@@ -28,10 +28,10 @@ def plot_last_2_candles(df):
     fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].values[i])
-        c = float(df2["Close"].values[i])
-        h = float(df2["High"].values[i])
-        l = float(df2["Low"].values[i])
+        o = float(df2["Open"].to_numpy()[i])
+        c = float(df2["Close"].to_numpy()[i])
+        h = float(df2["High"].to_numpy()[i])
+        l = float(df2["Low"].to_numpy()[i])
 
         color = "#00ff88" if c >= o else "#ff4d4d"
 
@@ -545,6 +545,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
