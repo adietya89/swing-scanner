@@ -128,33 +128,37 @@ def S(x):
     
 def plot_last_2_candles(df):
     """
-    Plot 2 candlestick terakhir yang valid (OHLC numeric, tidak NaN).
-    Ukuran plot disesuaikan agar jelas di Streamlit.
+    Plot 2 candlestick terakhir yang valid (OHLC numeric, tidak NaN)
+    Ukuran disesuaikan untuk Streamlit
     """
     import pandas as pd
     import matplotlib.pyplot as plt
+    import numpy as np
 
     # Pastikan df adalah DataFrame
     if not isinstance(df, pd.DataFrame):
-        return plt.figure()  # kosong kalau bukan DataFrame
+        fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
+        ax.text(0.5, 0.5, "No DataFrame", ha="center", va="center")
+        ax.axis("off")
+        return fig
 
     df = df.copy()
 
     # Pastikan kolom OHLC ada
     for col in ["Open", "Close", "High", "Low"]:
         if col not in df.columns:
-            df[col] = pd.NA  # isi NA kalau kolom tidak ada
+            df[col] = np.nan
 
-    # Ambil 10 baris terakhir, ubah ke numeric, drop yang gagal
-    for col in ["Open", "Close", "High", "Low"]:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
+    # Ambil 10 baris terakhir
+    df_last = df.tail(10)
 
-    df2 = df.tail(10).dropna(subset=["Open", "Close", "High", "Low"]).tail(2)
+    # Ambil hanya baris yang semuanya numeric
+    numeric_mask = df_last[["Open","Close","High","Low"]].apply(pd.to_numeric, errors='coerce').notna().all(axis=1)
+    df2 = df_last[numeric_mask].tail(2)
 
-    if len(df2) == 0:
-        # Tidak ada data valid
+    if df2.empty:
         fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
-        ax.text(0.5, 0.5, "No valid data", ha="center", va="center")
+        ax.text(0.5, 0.5, "No valid candlestick", ha="center", va="center")
         ax.axis("off")
         return fig
 
@@ -180,14 +184,14 @@ def plot_last_2_candles(df):
             color=color
         )
 
-    # Setting axis
+    # Axis off & batasan
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlim(-0.6, len(df2) - 0.4)
+    ax.set_xlim(-0.6, len(df2)-0.4)
     ax.set_ylim(df2[["Low","High"]].min().min()*0.995, df2[["Low","High"]].max().max()*1.005)
     ax.set_frame_on(False)
-
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
     return fig
 
 # =====================
@@ -542,6 +546,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
