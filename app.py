@@ -127,36 +127,39 @@ def S(x):
     return x.astype(float)
     
 def plot_last_2_candles(df):
+    """
+    Plot 2 candlestick terakhir yang valid (OHLC numeric, tidak NaN).
+    Ukuran plot disesuaikan agar jelas di Streamlit.
+    """
+    # Pastikan kolom OHLC numeric
     df = df.copy()
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
+    for col in ["Open", "Close", "High", "Low"]:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    # Ambil 10 baris terakhir, kemudian pilih 2 yang valid
+    df2 = df.tail(10).dropna(subset=["Open", "Close", "High", "Low"]).tail(2)
 
-    df2 = df.tail(2)
+    if len(df2) == 0:
+        # Tidak ada data valid
+        fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
+        ax.text(0.5, 0.5, "No valid data", ha="center", va="center")
+        ax.axis("off")
+        return fig
 
-    fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
+    fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
 
     for i in range(len(df2)):
-        val_o = df2["Open"].to_numpy()[i]
-        val_c = df2["Close"].to_numpy()[i]
-        val_h = df2["High"].to_numpy()[i]
-        val_l = df2["Low"].to_numpy()[i]
+        o = float(df2["Open"].to_numpy()[i])
+        c = float(df2["Close"].to_numpy()[i])
+        h = float(df2["High"].to_numpy()[i])
+        l = float(df2["Low"].to_numpy()[i])
 
-        # Debug print tipe dan isi
-        st.write(f"Index {i} - Open type: {type(val_o)}, value: {val_o}")
+        color = "#00C176" if c >= o else "#FF4D4D"
 
-        # Pastikan val_o, val_c, val_h, val_l scalar numbers
-        try:
-            o = float(val_o)
-            c = float(val_c)
-            h = float(val_h)
-            l = float(val_l)
-        except Exception as e:
-            st.write(f"Error converting to float at index {i}: {e}")
-            return None  # atau fig kosong agar tidak crash
+        # Wick
+        ax.plot([i, i], [l, h], color=color, linewidth=1)
 
-        color = "#00ff88" if c >= o else "#ff4d4d"
-
-        ax.plot([i, i], [l, h], color=color, linewidth=0.6)
+        # Body
         ax.bar(
             i,
             abs(c - o),
@@ -165,8 +168,14 @@ def plot_last_2_candles(df):
             color=color
         )
 
-    ax.axis("off")
-    plt.tight_layout(pad=0)
+    # Setting axis
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlim(-0.6, len(df2) - 0.4)
+    ax.set_ylim(df2[["Low","High"]].min().min()*0.995, df2[["Low","High"]].max().max()*1.005)
+    ax.set_frame_on(False)
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
 
 # =====================
@@ -521,6 +530,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
