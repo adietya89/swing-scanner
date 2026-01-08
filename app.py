@@ -363,9 +363,9 @@ for _, row in df.iterrows():
 
     with c4.container(height=ROW_HEIGHT):
         if row["Trend"] == "Bullish":
-           st.markdown("🟢 **Bullish**")
-       else:
-           st.markdown("🔴 **Bearish**")
+            st.markdown("🟢 **Bullish**")
+        else:
+            st.markdown("🔴 **Bearish**")
 
     with c5.container(height=ROW_HEIGHT):
        if row["Zone"] == "BUY ZONE":
@@ -505,6 +505,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
