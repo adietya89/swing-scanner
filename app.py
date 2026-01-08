@@ -355,7 +355,7 @@ for _, row in df.iterrows():
               "<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>",
               unsafe_allow_html=True
            )
-       else:
+        else:
            st.markdown(
               "<span style='font-size:13px; color:#FF4D4D; font-weight:600'>🔴 Bearish</span>",
               unsafe_allow_html=True
@@ -504,6 +504,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
