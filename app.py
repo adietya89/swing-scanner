@@ -326,7 +326,7 @@ h12.markdown("**SPARKLINE**")
 
 st.divider()
 
-ROW_HEIGHT = 90
+ROW_HEIGHT = 70
 
 # =====================
 # Kolom 1 - 9
@@ -492,6 +492,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
