@@ -256,6 +256,8 @@ rows = []
 for t in TICKERS:
     try:
         df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
         if df.empty or len(df) < 60:
             continue
 
@@ -504,6 +506,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
