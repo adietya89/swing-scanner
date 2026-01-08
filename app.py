@@ -273,7 +273,16 @@ for t in TICKERS:
     except Exception as e:
         st.write(f"Error {t}: {e}")
 
+# =====================
+# DATA PROCESS SELESAI
+# =====================
+
 df = pd.DataFrame(rows)
+
+if df.empty:
+    st.warning("Belum ada data")
+    st.stop()
+
 df = df.sort_values(
     by=["Confidence", "RSI"],
     ascending=[False, True]
@@ -427,94 +436,3 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
