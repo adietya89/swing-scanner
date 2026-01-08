@@ -129,7 +129,7 @@ def S(x):
 def plot_last_2_candles(df):
     """
     Plot 2 candlestick terakhir yang valid (OHLC numeric, tidak NaN)
-    Ukuran disesuaikan untuk Streamlit
+    Ukuran pas untuk Streamlit
     """
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -149,12 +149,9 @@ def plot_last_2_candles(df):
         if col not in df.columns:
             df[col] = np.nan
 
-    # Ambil 10 baris terakhir
-    df_last = df.tail(10)
-
-    # Ambil hanya baris yang semuanya numeric
-    numeric_mask = df_last[["Open","Close","High","Low"]].apply(pd.to_numeric, errors='coerce').notna().all(axis=1)
-    df2 = df_last[numeric_mask].tail(2)
+    # Filter numeric, aman dari NaN/non-numeric
+    numeric_df = df[["Open","Close","High","Low"]].apply(pd.to_numeric, errors='coerce')
+    df2 = df[numeric_df.notna().all(axis=1)].tail(2)
 
     if df2.empty:
         fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
@@ -162,14 +159,16 @@ def plot_last_2_candles(df):
         ax.axis("off")
         return fig
 
+    # Ambil angka murni
+    opens = df2["Open"].to_numpy(dtype=float)
+    closes = df2["Close"].to_numpy(dtype=float)
+    highs = df2["High"].to_numpy(dtype=float)
+    lows = df2["Low"].to_numpy(dtype=float)
+
     fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].iloc[i])
-        c = float(df2["Close"].iloc[i])
-        h = float(df2["High"].iloc[i])
-        l = float(df2["Low"].iloc[i])
-
+        o, c, h, l = opens[i], closes[i], highs[i], lows[i]
         color = "#00C176" if c >= o else "#FF4D4D"
 
         # Wick
@@ -188,7 +187,7 @@ def plot_last_2_candles(df):
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_xlim(-0.6, len(df2)-0.4)
-    ax.set_ylim(df2[["Low","High"]].min().min()*0.995, df2[["Low","High"]].max().max()*1.005)
+    ax.set_ylim(min(lows)*0.995, max(highs)*1.005)
     ax.set_frame_on(False)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
@@ -546,6 +545,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
