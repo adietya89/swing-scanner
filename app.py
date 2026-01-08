@@ -2,9 +2,14 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import yfinance as yf
 import ta
+import streamlit as st
+import pandas as pd
+import yfinance as yf
+import ta
 import pandas as pd
 import numpy as np
 import altair as alt
+from ta.trend import MACD
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from datetime import datetime
@@ -146,10 +151,10 @@ def plot_last_2_candles(df):
 # LOGIC
 # =====================
 def detect_macd_signal(close):
-    macd_df = ta.macd(close)
+    macd_ind = MACD(close)
 
-    macd_line = macd_df.iloc[:, 0]     # MACD
-    signal    = macd_df.iloc[:, 1]     # Signal
+    macd_line = macd_ind.macd()
+    signal    = macd_ind.macd_signal()
 
     if len(macd_line) < 2:
         return "Normal"
@@ -434,6 +439,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
