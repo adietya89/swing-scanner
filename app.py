@@ -128,8 +128,6 @@ def S(x):
     
 def plot_last_2_candles(df):
     df = df.copy()
-
-    # pastikan kolom flat
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
@@ -138,10 +136,23 @@ def plot_last_2_candles(df):
     fig, ax = plt.subplots(figsize=(0.6, 0.6), dpi=140)
 
     for i in range(len(df2)):
-        o = float(df2["Open"].to_numpy()[i])
-        c = float(df2["Close"].to_numpy()[i])
-        h = float(df2["High"].to_numpy()[i])
-        l = float(df2["Low"].to_numpy()[i])
+        val_o = df2["Open"].to_numpy()[i]
+        val_c = df2["Close"].to_numpy()[i]
+        val_h = df2["High"].to_numpy()[i]
+        val_l = df2["Low"].to_numpy()[i]
+
+        # Debug print tipe dan isi
+        st.write(f"Index {i} - Open type: {type(val_o)}, value: {val_o}")
+
+        # Pastikan val_o, val_c, val_h, val_l scalar numbers
+        try:
+            o = float(val_o)
+            c = float(val_c)
+            h = float(val_h)
+            l = float(val_l)
+        except Exception as e:
+            st.write(f"Error converting to float at index {i}: {e}")
+            return None  # atau fig kosong agar tidak crash
 
         color = "#00ff88" if c >= o else "#ff4d4d"
 
@@ -510,6 +521,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
