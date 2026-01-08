@@ -350,10 +350,16 @@ for _, row in df.iterrows():
            st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
 
     with c4.container(height=ROW_HEIGHT):
-        if row["Trend"] == "Bullish":
-            st.markdown("🟢 **Bullish**")
-        else:
-            st.markdown("🔴 **Bearish**")
+    if row["Trend"] == "Bullish":
+        st.markdown(
+            "<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<span style='font-size:13px; color:#FF4D4D; font-weight:600'>🔴 Bearish</span>",
+            unsafe_allow_html=True
+        )
 
     with c5.container(height=ROW_HEIGHT):
         if row["Zone"] == "BUY ZONE":
@@ -389,10 +395,16 @@ for _, row in df.iterrows():
            st.markdown(f"⚪ {rsi}")
 
     with c10.container(height=ROW_HEIGHT):
-         st.markdown(f"💰 **{row['TP']}**")
+        st.markdown(
+           f"<span style='font-size:13px'>💰 {row['TP']}</span>",
+           unsafe_allow_html=True
+        )
 
     with c11.container(height=ROW_HEIGHT):
-        st.markdown(f"🛑 **{row['SL']}**")
+        st.markdown(
+           f"<span style='font-size:13px'>🛑 {row['SL']}</span>",
+           unsafe_allow_html=True
+        )
 
     # =====================
     # Kolom 12 = Sparkline
@@ -492,6 +504,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
