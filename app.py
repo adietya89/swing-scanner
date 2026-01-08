@@ -119,7 +119,10 @@ SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 # HELPER (ANTI ERROR)
 # =====================
 def S(x):
-    return x.squeeze().astype(float)
+    if isinstance(x, pd.DataFrame):
+        x = x.iloc[:, 0]   # ambil kolom pertama saja
+    return x.astype(float)
+    
 def plot_last_2_candles(df):
     df2 = df.tail(2)
 
@@ -504,6 +507,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
