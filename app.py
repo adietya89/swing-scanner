@@ -346,9 +346,6 @@ df = df.sort_values(
 # =====================
 st.subheader("📊 • INFEKSIUS ACTIO")
 
-st.markdown("### 📊 Market Signal Overview")
-st.caption("Filtered berdasarkan trend, zone, candle, RSI, dan MACD")
-
 if df.empty:
     st.warning("Belum ada data")
 else:
@@ -552,6 +549,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
