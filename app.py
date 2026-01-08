@@ -145,19 +145,20 @@ def plot_last_2_candles(df):
 # LOGIC
 # =====================
 def detect_macd_signal(close):
-    macd = MACD(close)
-    macd_line = macd.macd()
-    signal_line = macd.macd_signal()
+    macd_df = ta.macd(close)
 
-    prev_macd = macd_line.iloc[-2]
-    prev_signal = signal_line.iloc[-2]
-    curr_macd = macd_line.iloc[-1]
-    curr_signal = signal_line.iloc[-1]
+    macd_line = macd_df.iloc[:, 0]     # MACD
+    signal    = macd_df.iloc[:, 1]     # Signal
 
-    if prev_macd < prev_signal and curr_macd > curr_signal:
+    if len(macd_line) < 2:
+        return "Normal"
+
+    if macd_line.iloc[-2] < signal.iloc[-2] and macd_line.iloc[-1] > signal.iloc[-1]:
         return "Golden Cross"
-    elif prev_macd > prev_signal and curr_macd < curr_signal:
+
+    elif macd_line.iloc[-2] > signal.iloc[-2] and macd_line.iloc[-1] < signal.iloc[-1]:
         return "Death Cross"
+
     else:
         return "Normal"
 
@@ -432,6 +433,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
