@@ -266,7 +266,7 @@ for t in TICKERS:
             "RSI": round(rsi, 1),
             "TP": round(tp, 2),
             "SL": round(sl, 2),
-            "Confidence": confidence,
+            "Confidence": 0,
             "_df": df.copy()
         })
 
@@ -275,8 +275,8 @@ for t in TICKERS:
 
 df = pd.DataFrame(rows)
 df = df.sort_values(
-    by=["Confidence", "Signal", "RSI"],
-    ascending=[False, False, True]
+    by=["Signal", "RSI"],
+    ascending=[False, True]
 )
 # =====================
 # UI TABLE
@@ -424,6 +424,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
