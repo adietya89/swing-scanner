@@ -62,9 +62,10 @@ st.markdown("""
 }
 .header-box {
     background: linear-gradient(135deg, #0e1117, #151b2c);
-    padding: 20px;
+    padding: 28px 24px;
     border-radius: 16px;
-    margin-bottom: 25px;
+    margin-top: 10px;
+    margin-bottom: 30px;
 [data-testid="stMetric"] {
     background-color: #0e1117;
     padding: 12px;
@@ -541,6 +542,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
