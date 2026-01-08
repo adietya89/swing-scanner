@@ -456,7 +456,6 @@ for _, row in df.iterrows():
 st.subheader("🎯 Confidence Meter")
 
 for _, row in df.iterrows():
-    for _, row in df.iterrows():
     score = row["Confidence"]
 
     col1, col2 = st.columns([1.2, 4])
@@ -505,6 +504,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
