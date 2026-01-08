@@ -9,10 +9,13 @@ import ta
 import pandas as pd
 import numpy as np
 import altair as alt
-from ta.trend import MACD
+
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from datetime import datetime
+from PIL import Image
+import os
+
 def plot_last_2_candles(df):
     df2 = df.tail(2)  # 2 candle seperti contoh
 
@@ -65,6 +68,22 @@ st.set_page_config(
     page_title="Swing Trading Scanner",
     layout="wide"
 )
+st.markdown("""
+<style>
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+[data-testid="stMetric"] {
+    background-color: #0e1117;
+    padding: 12px;
+    border-radius: 10px;
+}
+.stProgress > div > div {
+    background-color: #00c176;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # =====================
 # HEADER IMAGE (LOGO + TITLE)
@@ -75,14 +94,14 @@ from PIL import Image
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
 
-col1, col2 = st.columns([1.5, 6])
+col1, col2 = st.columns([1, 7])
 
 with col1:
-    st.image(logo, width=200)
+    st.image(logo, width=160)
 
 with col2:
-    st.title("📈 Swing Trading Scanner")
-    st.caption("Realtime update harian")
+    st.markdown("## 📈 **Swing Trading Scanner**")
+    st.caption("Realtime Daily Market Screening • Indonesia Stock Exchange")
     st.caption(
     "Memasuki dinamika pasar tahun 2026, strategi swing trading memerlukan ketelitian dalam menangkap momentum harga. "
     "Screener ini hadir sebagai alat bantu untuk mempersempit pilihan saham yang menunjukkan potensi pembalikan arah atau kelanjutan tren. "
@@ -169,25 +188,28 @@ def detect_macd_signal(close):
         return "Normal"
 
 def detect_ma_position(close):
-    mas = {
-        "MA5": 5,
-        "MA10": 10,
-        "MA20": 20,
-        "MA50": 50,
-        "MA100": 100,
-        "MA200": 200
-    }
+    mas = [
+        ("MA5", 5),
+        ("MA10", 10),
+        ("MA20", 20),
+        ("MA50", 50),
+        ("MA100", 100),
+        ("MA200", 200),
+    ]
 
     price = close.iloc[-1]
     above = []
 
-    for name, period in mas.items():
+    for name, period in mas:
         if len(close) >= period:
-            ma_val = close.rolling(period).mean().iloc[-1]
-            if price > ma_val:
+            ma = close.rolling(period).mean().iloc[-1]
+            if price > ma:
                 above.append(name)
 
-    return ", ".join(above) if above else "-"
+    if not above:
+        return "—"
+
+    return "⬆ " + " ".join(above)
 
 def detect_trend(close):
     ema20 = EMAIndicator(close, 20).ema_indicator()
@@ -288,6 +310,9 @@ df = df.sort_values(
 # =====================
 st.subheader("📊 • INFEKSIUS ACTIO")
 
+st.markdown("### 📊 Market Signal Overview")
+st.caption("Filtered berdasarkan trend, zone, candle, RSI, dan MACD")
+
 if df.empty:
     st.warning("Belum ada data")
 else:
@@ -331,13 +356,24 @@ for _, row in df.iterrows():
         st.write(row["Harga"])
 
     with c3.container(height=ROW_HEIGHT):
-        st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
+        if row["Signal"] == "BUY":
+           st.markdown("<span style='color:#00C176; font-weight:bold'>BUY</span>", unsafe_allow_html=True)
+        else:
+           st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
 
     with c4.container(height=ROW_HEIGHT):
-        st.write(row["Trend"])
+        if row["Trend"] == "Bullish":
+           st.markdown("🟢 **Bullish**")
+       else:
+           st.markdown("🔴 **Bearish**")
 
     with c5.container(height=ROW_HEIGHT):
-        st.write(row["Zone"])
+       if row["Zone"] == "BUY ZONE":
+          st.success("BUY ZONE")
+       elif row["Zone"] == "SELL ZONE":
+          st.error("SELL ZONE")
+       else:
+          st.write("MID")
 
     with c6.container(height=ROW_HEIGHT):
         fig = plot_last_2_candles(row["_df"])
@@ -347,21 +383,28 @@ for _, row in df.iterrows():
         st.write(row["MA_Pos"])
         
     with c8.container(height=ROW_HEIGHT):
-        if row["MACD"] == "Golden Cross":
-           st.success("Golden Cross")
-        elif row["MACD"] == "Death Cross":
-           st.error("Death Cross")
-        else:
-           st.write("Normal")
+       macd = row["MACD"]
+       if macd == "Golden Cross":
+          st.markdown("🟢 **Golden Cross**")
+       elif macd == "Death Cross":
+          st.markdown("🔴 **Death Cross**")
+       else:
+          st.markdown("⚪ Normal")
 
     with c9.container(height=ROW_HEIGHT):
-        st.write(row["RSI"])
+        rsi = row["RSI"]
+        if rsi < 40:
+           st.markdown(f"🟢 **{rsi}**")
+        elif rsi > 70:
+           st.markdown(f"🔴 **{rsi}**")
+        else:
+           st.markdown(f"⚪ {rsi}")
 
     with c10.container(height=ROW_HEIGHT):
-        st.write(row["TP"])
+         st.markdown(f"💰 **{row['TP']}**")
 
     with c11.container(height=ROW_HEIGHT):
-        st.write(row["SL"])
+        st.markdown(f"🛑 **{row['SL']}**")
 
     # =====================
     # Kolom 12 = Sparkline
@@ -386,12 +429,18 @@ for _, row in df.iterrows():
                 'close': norm_values
             })
 
+            trend_color = "#999"
+            if close_values[-1] > close_values[0]:
+               trend_color = "#00C176"   # naik
+            elif close_values[-1] < close_values[0]:
+                trend_color = "#FF4D4D"   # turun
+
             chart = (
                 alt.Chart(data)
-                .mark_line(color="#5f88cc", strokeWidth=1.5)
+                .mark_line(color=trend_color, strokeWidth=1.8)
                 .encode(
-                    x=alt.X('index', axis=None),
-                    y=alt.Y('close', axis=None, scale=alt.Scale(domain=[0,1]))
+                   x=alt.X('index', axis=None),
+                   y=alt.Y('close', axis=None, scale=alt.Scale(domain=[0,1]))
                 )
                 .properties(height=30)
             )
@@ -407,13 +456,30 @@ for _, row in df.iterrows():
 st.subheader("🎯 Confidence Meter")
 
 for _, row in df.iterrows():
-    col1, col2 = st.columns([1, 4])
+    for _, row in df.iterrows():
+    score = row["Confidence"]
+
+    col1, col2 = st.columns([1.2, 4])
+
     with col1:
-        st.write(f"**{row['Kode'].replace('.JK','')}**")
-        st.write("🟢 BUY" if row["Signal"] == "BUY" else "⚪ HOLD")
+        st.markdown(f"**{row['Kode'].replace('.JK','')}**")
+        if row["Signal"] == "BUY":
+            st.markdown("🟢 **BUY**")
+        else:
+            st.markdown("⚪ HOLD")
+
     with col2:
-        st.progress(row["Confidence"] / 4)
-        st.caption(f"{row['Confidence']} / 4 indikator")
+        st.progress(score / 4)
+
+        if score == 4:
+            st.caption("🔥 Sangat Kuat (4/4 indikator)")
+        elif score == 3:
+            st.caption("✅ Kuat (3/4 indikator)")
+        elif score == 2:
+            st.caption("⚠ Cukup (2/4 indikator)")
+        else:
+            st.caption("❌ Lemah (<2 indikator)")
+
 
 # =====================
 # BUY ONLY
@@ -439,6 +505,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
