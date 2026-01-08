@@ -370,12 +370,12 @@ for _, row in df.iterrows():
             st.markdown("🔴 **Bearish**")
 
     with c5.container(height=ROW_HEIGHT):
-       if row["Zone"] == "BUY ZONE":
-          st.success("BUY ZONE")
-       elif row["Zone"] == "SELL ZONE":
-          st.error("SELL ZONE")
-       else:
-          st.write("MID")
+        if row["Zone"] == "BUY ZONE":
+           st.markdown("<span style='color:#00C176; font-weight:600'>BUY</span>", unsafe_allow_html=True)
+        elif row["Zone"] == "SELL ZONE":
+           st.markdown("<span style='color:#FF4D4D; font-weight:600'>SELL</span>", unsafe_allow_html=True)
+        else:
+           st.markdown("<span style='color:#999'>MID</span>", unsafe_allow_html=True)
 
     with c6.container(height=ROW_HEIGHT):
         fig = plot_last_2_candles(row["_df"])
@@ -506,6 +506,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
