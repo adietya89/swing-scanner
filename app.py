@@ -153,7 +153,7 @@ def detect_candle_pattern(df):
     h2, l2 = df["High"].iloc[-1], df["Low"].iloc[-1]
 
     body2 = abs(c2 - o2)
-    range2 = h2 - l2 if h2 != l2 else 1
+    range2 = float(h2 - l2) if float(h2) != float(l2) else 1.0
     lower_wick = min(o2, c2) - l2
     upper_wick = h2 - max(o2, c2)
 
@@ -231,11 +231,18 @@ rows = []
 for t in TICKERS:
     try:
         df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
+
+# FIX MULTI INDEX (INI WAJIB)
+if isinstance(df.columns, pd.MultiIndex):
+    df.columns = df.columns.get_level_values(0)
+
+df = df.dropna()
+
         if df.empty or len(df) < 60:
             continue
 
         df = df.dropna()
-        close = S(df["Close"])
+        close = df["Close"].astype(float).copy()
         price = close.iloc[-1]
 
         trend = detect_trend(close)
@@ -436,3 +443,4 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
