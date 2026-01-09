@@ -331,6 +331,7 @@ def detect_fake_rebound(close, df):
 # =====================
 rows = []
 
+with st.spinner("⏳ Mengambil data 900 saham... Mohon tunggu beberapa menit"): 
 for t in TICKERS:
     try:
         df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
@@ -635,6 +636,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
