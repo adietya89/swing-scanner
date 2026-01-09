@@ -117,6 +117,10 @@ INTERVAL = "1d"
 
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
+fake_rebound_filter = st.sidebar.checkbox(
+    "Filter Fake Rebound (hilangkan saham naik palsu)",
+    value=False
+)
 
 # =====================
 # HELPER (ANTI ERROR)
@@ -288,6 +292,21 @@ def build_signal(zone, bias, trend):
     if zone == "BUY ZONE" and bias == "Bullish" and trend == "Bullish":
         return "BUY"
     return "HOLD"
+    
+# =====================
+# FAKE REBOUND DETECTION
+# =====================
+def detect_fake_rebound(close, df):
+    price = close.iloc[-1]
+    candle_pattern, bias = detect_candle(df)
+    rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+    macd_signal = detect_macd_signal(close)
+    ema50 = EMAIndicator(close, 50).ema_indicator().iloc[-1]
+
+    # Syarat fake rebound: harga < EMA50, RSI < 50, candle shooting star, dan MACD bukan golden cross
+    if price < ema50 and rsi < 50 and candle_pattern == "Shooting Star" and macd_signal != "Golden Cross":
+        return True
+    return False
 
 # =====================
 # DATA PROCESS
@@ -336,7 +355,8 @@ for t in TICKERS:
         confidence += 1 if zone == "BUY ZONE" else 0
         confidence += 1 if bias == "Bullish" else 0
         confidence += 1 if rsi < 40 else 0
-
+        
+        fake_rebound = detect_fake_rebound(close, df)
         rows.append({
             "Kode": t,
             "Harga": round(price, 2),
@@ -353,6 +373,7 @@ for t in TICKERS:
             "BUY_Filter": buy_filter,
             "SELL_Filter": sell_filter,
             "MA_Dist(%)": round(nearest_ma_dist, 2),
+            "Fake_Rebound": fake_rebound,
             "_df": df.copy()
         })
 
@@ -434,6 +455,10 @@ if search_code:
     filtered_df = filtered_df[
         filtered_df["Kode"].str.contains(search_code, case=False)
     ]
+    
+# Filter fake rebound
+if fake_rebound_filter:
+    filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
 
 for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
@@ -593,3 +618,4 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
