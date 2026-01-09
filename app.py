@@ -381,6 +381,7 @@ for t in TICKERS:
         st.write(f"Error {t}: {e}")
 
 df = pd.DataFrame(rows)
+df["Fake_Rebound"] = df["Fake_Rebound"].astype(bool)
 df = df.sort_values(
     by=["Confidence", "Signal", "RSI"],
     ascending=[False, False, True]
@@ -618,4 +619,5 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
