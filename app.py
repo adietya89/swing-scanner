@@ -121,6 +121,13 @@ SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 # =====================
 # HELPER (ANTI ERROR)
 # =====================
+def distance_to_ma(close, period):
+    if len(close) < period:
+        return np.nan
+    ma = close.rolling(period).mean().iloc[-1]
+    price = close.iloc[-1]
+    return abs(price - ma) / ma * 100
+
 def S(x):
     if isinstance(x, pd.DataFrame):
         x = x.iloc[:, 0]   # ambil kolom pertama saja
@@ -299,14 +306,27 @@ for t in TICKERS:
         close = S(df["Close"])
         price = close.iloc[-1]
         macd_signal = detect_macd_signal(close)
+        dist_ma20 = distance_to_ma(close, 20)
+        dist_ma50 = distance_to_ma(close, 50)
+        nearest_ma_dist = np.nanmin([dist_ma20, dist_ma50])
         ma_pos = detect_ma_position(close)
 
         trend = detect_trend(close)
         zone = detect_zone(df)
         candle, bias = detect_candle(df)
         rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-
         signal = build_signal(zone, bias, trend)
+        buy_filter = (
+            macd_signal == "Golden Cross" and
+            rsi <= 50 and
+            nearest_ma_dist <= 2
+        )
+
+        sell_filter = (
+            macd_signal == "Death Cross" and
+            rsi >= 70 and
+            nearest_ma_dist <= 2
+        )
 
         tp = price * (1 + TP_PCT / 100)
         sl = price * (1 - SL_PCT / 100)
@@ -330,6 +350,9 @@ for t in TICKERS:
             "TP": round(tp, 2),
             "SL": round(sl, 2),
             "Confidence": confidence,
+            "BUY_Filter": buy_filter,
+            "SELL_Filter": sell_filter,
+            "MA_Dist(%)": round(nearest_ma_dist, 2),
             "_df": df.copy()
         })
 
@@ -345,6 +368,22 @@ df = df.sort_values(
 # UI TABLE
 # =====================
 st.subheader("📊 • INFEKSIUS ACTIO")
+
+st.subheader("🎯 FILTER STRATEGI")
+
+f1, f2, f3 = st.columns(3)
+
+if "trade_filter" not in st.session_state:
+    st.session_state.trade_filter = "ALL"
+
+if f1.button("📦 ALL"):
+    st.session_state.trade_filter = "ALL"
+
+if f2.button("🟢 BUY"):
+    st.session_state.trade_filter = "BUY"
+
+if f3.button("🔴 SELL"):
+    st.session_state.trade_filter = "SELL"
 
 if df.empty:
     st.warning("Belum ada data")
@@ -376,11 +415,18 @@ ROW_HEIGHT = 70
 # =====================
 # Kolom 1 - 9
 # =====================
-for _, row in df.iterrows():
+filtered_df = df.copy()
+
+if st.session_state.trade_filter == "BUY":
+    filtered_df = df[df["BUY_Filter"]]
+
+elif st.session_state.trade_filter == "SELL":
+    filtered_df = df[df["SELL_Filter"]]
+
+for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = st.columns(
     [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1, 1, 1, 1]
     )
-
  
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
@@ -549,5 +595,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
