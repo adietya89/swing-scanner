@@ -397,16 +397,16 @@ else:
     st.subheader("🕯️Signal Saham ")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7b, h7, h8, h9, h10, h11, h12 = st.columns(
+[1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
 h2.markdown("**Harga**")
-h3.markdown("**Signal**")
-h4.markdown("**Trend**")
-h5.markdown("**Zone**")
-h6.markdown("**Candle**")
+h3.markdown("**Trend**")
+h4.markdown("**Zone**")
+h5.markdown("**Candle**")
+h6.markdown("**Candle Pattern**")
 h7.markdown("**MA >**")
 h8.markdown("**MACD**")
 h9.markdown("**RSI**")
@@ -437,9 +437,10 @@ if search_code:
 
 
 for _, row in filtered_df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7b, c7, c8, c9, c10, c11, c12 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
     )
+
  
     with c1.container(height=ROW_HEIGHT):
         st.write(row["Kode"].replace(".JK",""))
@@ -476,7 +477,15 @@ for _, row in filtered_df.iterrows():
     with c6.container(height=ROW_HEIGHT):
         fig = plot_last_2_candles(row["_df"])
         st.pyplot(fig, clear_figure=True)
-        
+
+    with c7b.container(height=ROW_HEIGHT):
+         candle_pattern, bias = detect_candle(row["_df"])
+        if candle_pattern != "Normal":
+           color = "#00C176" if bias == "Bullish" else "#FF4D4D"
+           st.markdown(f"<span style='color:{color}; font-weight:600'>{candle_pattern}</span>", unsafe_allow_html=True)
+        else:
+           st.markdown("<span style='color:#999'>Normal</span>", unsafe_allow_html=True)
+
     with c7.container(height=ROW_HEIGHT):
         st.write(row["MA_Pos"])
         
@@ -608,6 +617,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
