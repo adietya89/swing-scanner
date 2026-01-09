@@ -118,7 +118,7 @@ INTERVAL = "1d"
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 fake_rebound_filter = st.sidebar.checkbox(
-    "Filter Fake Rebound (hilangkan saham naik palsu)",
+    "Filter Fake Rebound",
     value=False
 )
 
@@ -619,5 +619,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
