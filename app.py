@@ -403,16 +403,16 @@ h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13 = st.columns(
 
 h1.markdown("**Kode**")
 h2.markdown("**Harga**")
-h3.markdown("**Trend**")
-h4.markdown("**Zone**")
-h5.markdown("**Candle**")
-h6.markdown("**Candle Pattern**")
-h7.markdown("**MA >**")
-h8.markdown("**MACD**")
-h9.markdown("**RSI**")
-h10.markdown("**TP**")
-h11.markdown("**SL**")
-h12.markdown("**Confidence**")
+h3.markdown("**Signal**")
+h4.markdown("**Trend**")
+h5.markdown("**Zone**")
+h6.markdown("**Candle**")
+h7.markdown("**Candle Pattern**")
+h8.markdown("**MA >**")
+h9.markdown("**MACD**")
+h10.markdown("**RSI**")
+h11.markdown("**TP**")
+h12.markdown("**SL**")
 h13.markdown("**SPARKLINE**")
 
 st.divider()
@@ -595,6 +595,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
