@@ -371,7 +371,7 @@ st.subheader("📊 • INFEKSIUS ACTIO")
 
 st.subheader("🎯 FILTER STRATEGI")
 
-f1, f2, f3 = st.columns(3)
+f1, f2, f3, f4 = st.columns([1, 1, 1, 2])
 
 if "trade_filter" not in st.session_state:
     st.session_state.trade_filter = "ALL"
@@ -384,6 +384,12 @@ if f2.button("🟢 BUY"):
 
 if f3.button("🔴 SELL"):
     st.session_state.trade_filter = "SELL"
+
+search_code = f4.text_input(
+    "🔍 Cari Kode Saham",
+    placeholder="contoh: BBCA / TLKM / BBRI"
+).upper()
+
 
 if df.empty:
     st.warning("Belum ada data")
@@ -422,6 +428,13 @@ if st.session_state.trade_filter == "BUY":
 
 elif st.session_state.trade_filter == "SELL":
     filtered_df = df[df["SELL_Filter"]]
+    
+# 🔍 Filter cari 1 saham
+if search_code:
+    filtered_df = filtered_df[
+        filtered_df["Kode"].str.contains(search_code, case=False)
+    ]
+
 
 for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12 = st.columns(
@@ -595,6 +608,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
