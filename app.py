@@ -342,7 +342,14 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
 
             df = df.dropna()
             close = S(df["Close"])
-            price = close.iloc[-1]
+            try:
+                intraday = yf.Ticker(t).history(period="1d", interval="1m")
+                if not intraday.empty:
+                   price = intraday["Close"].iloc[-1]
+                else:
+                   price = close.iloc[-1]
+           except Exception:
+    price = close.iloc[-1]
             macd_signal = detect_macd_signal(close)
             dist_ma20 = distance_to_ma(close, 20)
             dist_ma50 = distance_to_ma(close, 50)
@@ -636,6 +643,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
