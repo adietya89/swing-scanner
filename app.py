@@ -397,8 +397,8 @@ else:
     st.subheader("🕯️Signal Saham ")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7b, h7, h8, h9, h10, h11, h12 = st.columns(
-[1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
 )
 
 h1.markdown("**Kode**")
@@ -412,7 +412,8 @@ h8.markdown("**MACD**")
 h9.markdown("**RSI**")
 h10.markdown("**TP**")
 h11.markdown("**SL**")
-h12.markdown("**SPARKLINE**")
+h12.markdown("**Confidence**")
+h13.markdown("**SPARKLINE**")
 
 st.divider()
 
@@ -437,95 +438,77 @@ if search_code:
 
 
 for _, row in filtered_df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7b, c7, c8, c9, c10, c11, c12 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
+        [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
     )
 
- 
-    with c1.container(height=ROW_HEIGHT):
+    with c1:
         st.write(row["Kode"].replace(".JK",""))
 
-    with c2.container(height=ROW_HEIGHT):
+    with c2:
         st.write(row["Harga"])
 
-    with c3.container(height=ROW_HEIGHT):
+    with c3:
         if row["Signal"] == "BUY":
-           st.markdown("<span style='color:#00C176; font-weight:bold'>BUY</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#00C176; font-weight:bold'>BUY</span>", unsafe_allow_html=True)
         else:
-           st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
 
-    with c4.container(height=ROW_HEIGHT):
+    with c4:
         if row["Trend"] == "Bullish":
-           st.markdown(
-              "<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>",
-              unsafe_allow_html=True
-           )
+            st.markdown("<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>", unsafe_allow_html=True)
         else:
-           st.markdown(
-              "<span style='font-size:13px; color:#FF4D4D; font-weight:600'>🔴 Bearish</span>",
-              unsafe_allow_html=True
-           )
+            st.markdown("<span style='font-size:13px; color:#FF4D4D; font-weight:600'>🔴 Bearish</span>", unsafe_allow_html=True)
 
-    with c5.container(height=ROW_HEIGHT):
+    with c5:
         if row["Zone"] == "BUY ZONE":
-           st.markdown("<span style='color:#00C176; font-weight:600'>BUY</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#00C176; font-weight:600'>BUY</span>", unsafe_allow_html=True)
         elif row["Zone"] == "SELL ZONE":
-           st.markdown("<span style='color:#FF4D4D; font-weight:600'>SELL</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#FF4D4D; font-weight:600'>SELL</span>", unsafe_allow_html=True)
         else:
-           st.markdown("<span style='color:#999'>MID</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#999'>MID</span>", unsafe_allow_html=True)
 
-    with c6.container(height=ROW_HEIGHT):
+    with c6:
         fig = plot_last_2_candles(row["_df"])
         st.pyplot(fig, clear_figure=True)
 
-    with c7b.container(height=ROW_HEIGHT):
+    with c7:
         candle_pattern, bias = detect_candle(row["_df"])
         if candle_pattern != "Normal":
-           color = "#00C176" if bias == "Bullish" else "#FF4D4D"
-           st.markdown(
-               f"<span style='color:{color}; font-weight:600'>{candle_pattern}</span>",
-               unsafe_allow_html=True
-           )
+            color = "#00C176" if bias == "Bullish" else "#FF4D4D"
+            st.markdown(f"<span style='color:{color}; font-weight:600'>{candle_pattern}</span>", unsafe_allow_html=True)
         else:
-          st.markdown("<span style='color:#999'>Normal</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color:#999'>Normal</span>", unsafe_allow_html=True)
 
-    with c7.container(height=ROW_HEIGHT):
+    with c8:
         st.write(row["MA_Pos"])
-        
-    with c8.container(height=ROW_HEIGHT):
-       macd = row["MACD"]
-       if macd == "Golden Cross":
-          st.markdown("🟢 **Golden Cross**")
-       elif macd == "Death Cross":
-          st.markdown("🔴 **Death Cross**")
-       else:
-          st.markdown("⚪ Normal")
 
-    with c9.container(height=ROW_HEIGHT):
+    with c9:
+        macd = row["MACD"]
+        if macd == "Golden Cross":
+            st.markdown("🟢 **Golden Cross**")
+        elif macd == "Death Cross":
+            st.markdown("🔴 **Death Cross**")
+        else:
+            st.markdown("⚪ Normal")
+
+    with c10:
         rsi = row["RSI"]
         if rsi < 40:
-           st.markdown(f"🟢 **{rsi}**")
+            st.markdown(f"🟢 **{rsi}**")
         elif rsi > 70:
-           st.markdown(f"🔴 **{rsi}**")
+            st.markdown(f"🔴 **{rsi}**")
         else:
-           st.markdown(f"⚪ {rsi}")
+            st.markdown(f"⚪ {rsi}")
 
-    with c10.container(height=ROW_HEIGHT):
-        st.markdown(
-           f"<span style='font-size:13px'>💰 {row['TP']}</span>",
-           unsafe_allow_html=True
-        )
+    with c11:
+        st.markdown(f"<span style='font-size:13px'>💰 {row['TP']}</span>", unsafe_allow_html=True)
 
-    with c11.container(height=ROW_HEIGHT):
-        st.markdown(
-           f"<span style='font-size:13px'>🛑 {row['SL']}</span>",
-           unsafe_allow_html=True
-        )
-
-    # =====================
-    # Kolom 12 = Sparkline
-    # =====================
     with c12:
+        st.markdown(f"<span style='font-size:13px'>🛑 {row['SL']}</span>", unsafe_allow_html=True)
+
+    with c13:
+        # Sparkline (Altair chart)
         try:
             close = row["_df"]["Close"].tail(90)
             close_values = close.squeeze().to_numpy()
@@ -539,31 +522,23 @@ for _, row in filtered_df.iterrows():
                 mean_val = np.mean(norm_values)
                 norm_values = norm_values - mean_val + 0.5
                 norm_values = np.clip(norm_values, 0, 1)
-                     
-            data = pd.DataFrame({
-                'index': range(len(norm_values)),
-                'close': norm_values
-            })
+
+            data = pd.DataFrame({'index': range(len(norm_values)), 'close': norm_values})
 
             trend_color = "#999"
             if close_values[-1] > close_values[0]:
-               trend_color = "#00C176"   # naik
+                trend_color = "#00C176"   # naik
             elif close_values[-1] < close_values[0]:
                 trend_color = "#FF4D4D"   # turun
 
             chart = (
                 alt.Chart(data)
                 .mark_line(color=trend_color, strokeWidth=1.8)
-                .encode(
-                   x=alt.X('index', axis=None),
-                   y=alt.Y('close', axis=None, scale=alt.Scale(domain=[0,1]))
-                )
+                .encode(x=alt.X('index', axis=None), y=alt.Y('close', axis=None, scale=alt.Scale(domain=[0,1])))
                 .properties(height=30)
             )
-
             st.altair_chart(chart, use_container_width=True)
-            
-        except Exception as e:
+        except Exception:
             st.write("-")
             
 # =====================
@@ -620,6 +595,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
