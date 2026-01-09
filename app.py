@@ -414,8 +414,6 @@ if f4.button("🔴 SELL"):
 
 if df.empty:
     st.warning("Belum ada data")
-else:
-    st.subheader("🕯️Signal Saham ")
 
 # Header tabel
 h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13 = st.columns(
@@ -619,6 +617,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
