@@ -109,21 +109,11 @@ st.cache_data(ttl=60 * 60 * 24)
 @st.cache_data
 def load_idx_tickers():
     try:
-        # Coba baca CSV default (comma)
-        df = pd.read_csv("idx_tickers.csv")
-        # Jika hanya ada satu kolom tanpa header, beri nama
-        if df.shape[1] == 1:
-            df.columns = ["Kode"]
-    except pd.errors.ParserError:
-        # Kalau gagal, coba tab atau semicolon
-        try:
-            df = pd.read_csv("idx_tickers.csv", sep="\t", header=None, names=["Kode"])
-        except:
-            df = pd.read_csv("idx_tickers.csv", sep=";", header=None, names=["Kode"])
-    
-    # Pastikan kolom "Kode" ada
-    if "Kode" not in df.columns:
-        df.columns = ["Kode"]
+        # Paksa delimiter newline (setiap baris satu kode)
+        df = pd.read_csv("idx_tickers.csv", delimiter="\n", header=None, names=["Kode"])
+    except Exception as e:
+        st.error(f"Gagal load idx_tickers.csv: {e}")
+        return []
     
     # Buat list ticker dengan suffix .JK
     tickers = (df["Kode"].astype(str).str.strip() + ".JK").tolist()
@@ -635,6 +625,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
