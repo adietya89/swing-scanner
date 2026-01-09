@@ -424,18 +424,17 @@ ROW_HEIGHT = 70
 # =====================
 filtered_df = df.copy()
 
+# 🔍 Filter cari 1 saham
+if search_code:
+    filtered_df = filtered_df[
+        filtered_df["Kode"].str.contains(search_code, case=False)
+    ]
 if st.session_state.trade_filter == "BUY":
     filtered_df = df[df["BUY_Filter"]]
 
 elif st.session_state.trade_filter == "SELL":
     filtered_df = df[df["SELL_Filter"]]
     
-# 🔍 Filter cari 1 saham
-if search_code:
-    filtered_df = filtered_df[
-        filtered_df["Kode"].str.contains(search_code, case=False)
-    ]
-
 
 for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
@@ -595,6 +594,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
