@@ -479,12 +479,15 @@ for _, row in filtered_df.iterrows():
         st.pyplot(fig, clear_figure=True)
 
     with c7b.container(height=ROW_HEIGHT):
-         candle_pattern, bias = detect_candle(row["_df"])
+        candle_pattern, bias = detect_candle(row["_df"])
         if candle_pattern != "Normal":
            color = "#00C176" if bias == "Bullish" else "#FF4D4D"
-           st.markdown(f"<span style='color:{color}; font-weight:600'>{candle_pattern}</span>", unsafe_allow_html=True)
+           st.markdown(
+               f"<span style='color:{color}; font-weight:600'>{candle_pattern}</span>",
+               unsafe_allow_html=True
+           )
         else:
-           st.markdown("<span style='color:#999'>Normal</span>", unsafe_allow_html=True)
+          st.markdown("<span style='color:#999'>Normal</span>", unsafe_allow_html=True)
 
     with c7.container(height=ROW_HEIGHT):
         st.write(row["MA_Pos"])
@@ -617,6 +620,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
