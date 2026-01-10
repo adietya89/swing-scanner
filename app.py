@@ -140,9 +140,12 @@ fake_rebound_filter = st.sidebar.checkbox(
     value=False
 )
 # =====================
-# SIDEBAR – HARGA WAJAR SAHAM
+# SIDEBAR MENU PILIHAN
 # =====================
-st.sidebar.markdown("## 💎 Harga Wajar Saham")
+menu_option = st.sidebar.radio(
+    "📋 Pilih Menu",
+    ["Harga Wajar", "Average Down"]
+)
 
 fair_search = st.sidebar.text_input(
     "🔍 Cari Kode Saham",
@@ -154,6 +157,32 @@ show_fair_value = st.sidebar.checkbox(
     value=True
 )
 
+elif menu_option == "Average Down":
+    st.sidebar.markdown("## 📌 Average Down (AVD)")
+
+    ticker_avd = st.sidebar.text_input(
+        "🔍 Masukkan Kode Saham",
+        placeholder="BBRI / BBCA / TLKM"
+    ).upper()
+
+    avd_price = st.sidebar.number_input(
+        "Harga Terakhir Setelah Average Down",
+        value=0.0,
+        step=100.0,
+        format="%.2f"
+    )
+
+    avd_lot = st.sidebar.number_input(
+        "Jumlah Lot",
+        value=0,
+        step=1
+    )
+
+    if avd_price > 0 and avd_lot > 0:
+        st.sidebar.markdown(f"💹 Harga Terakhir: **{avd_price}**")
+        st.sidebar.markdown(f"📦 Lot: **{avd_lot}**")
+    else:
+        st.sidebar.info("Isi harga dan lot untuk melihat detail")
 
 # =====================
 # HELPER (ANTI ERROR)
@@ -875,6 +904,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
