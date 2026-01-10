@@ -216,17 +216,11 @@ def calculate_fibonacci(df, lookback=60):
     return fib
 
 def distance_to_ma(close, period):
-    try:
-        close = close.astype(float)
-        if len(close) < period:
-            return np.nan
-
-        ma = float(close.rolling(period).mean().iloc[-1])
-        price = float(close.iloc[-1])
-
-        return abs(price - ma) / ma * 100
-    except Exception:
+    if len(close) < period:
         return np.nan
+    ma = close.rolling(period).mean().iloc[-1]
+    price = close.iloc[-1]
+    return abs(price - ma) / ma * 100
 
 def S(x):
     if isinstance(x, pd.DataFrame):
@@ -471,19 +465,6 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
     for t in TICKERS:
         try:
             df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
-            # ===== FIX DATA CACAT =====
-            df = df.copy()
-            for col in ["Open", "High", "Low", "Close", "Volume"]:
-                if col in df.columns:
-                   df[col] = pd.to_numeric(df[col], errors="coerce")
-
-            df = df.dropna(subset=["Open", "High", "Low", "Close"])
-            
-            # Kalau data kosong, skip saham ini
-            if df.empty or len(df) < 60:
-               st.write(f"Skip {t}, data tidak cukup")
-               continue
-                
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
             if df.empty or len(df) < 60:
@@ -502,14 +483,9 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
             macd_signal = detect_macd_signal(close)
             dist_ma20 = distance_to_ma(close, 20)
             dist_ma50 = distance_to_ma(close, 50)
-            
-            # ===== SAFE VERSION =====
-            nearest_ma_dist = np.nanmin([
-                float(dist_ma20) if np.isscalar(dist_ma20) else np.nan,
-                float(dist_ma50) if np.isscalar(dist_ma50) else np.nan
-            ])
-            
+            nearest_ma_dist = np.nanmin([dist_ma20, dist_ma50])
             ma_pos = detect_ma_position(close)
+
             trend = detect_trend(close)
             zone = detect_zone(df)
             candle, bias = detect_candle(df)
@@ -788,21 +764,17 @@ for _, row in filtered_df.iterrows():
         # Sparkline (Altair chart)
         try:
             close = row["_df"]["Close"].tail(90)
-            # Paksa jadi 1D float
-            if isinstance(close, pd.DataFrame):
-               close = close.iloc[:, 0]
-
-            close_values = pd.to_numeric(close, errors="coerce").dropna().to_numpy()
+            close_values = close.squeeze().to_numpy()
 
             min_val = close_values.min()
             max_val = close_values.max()
             if max_val - min_val == 0:
-              norm_values = np.full_like(close_values, 0.5, dtype=float)
+                norm_values = np.full_like(close_values, 0.5, dtype=float)
             else:
-              norm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
-              mean_val = np.mean(norm_values)
-              norm_values = norm_values - mean_val + 0.5
-              norm_values = np.clip(norm_values, 0, 1)
+                norm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
+                mean_val = np.mean(norm_values)
+                norm_values = norm_values - mean_val + 0.5
+                norm_values = np.clip(norm_values, 0, 1)
 
             data = pd.DataFrame({'index': range(len(norm_values)), 'close': norm_values})
 
@@ -823,7 +795,7 @@ for _, row in filtered_df.iterrows():
             st.write("-")
             
     with c14:
-         score = int(row["Confidence"])
+         score = row["Confidence"]
 
          if score >= 4:
             color = "#00C176"
@@ -873,16 +845,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
-
-
-
-
-
-
-
-
-
-
 
 
 
