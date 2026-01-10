@@ -245,32 +245,42 @@ def plot_last_2_candles(df):
     return fig
 
 # =====================
-# HELPER – HARGA WAJAR REAL (PER & PBV)
+# HELPER – HARGA WAJAR SIMPLE
 # =====================
-def calculate_fair_value_real(ticker, current_price):
+def calculate_fair_value_simple(ticker, current_price):
     try:
         info = yf.Ticker(ticker).info
 
         eps = info.get("trailingEps", None)
-        book_value = info.get("bookValue", None)
-        per = info.get("trailingPE", None)
-        pbv = info.get("priceToBook", None)
+        sector = info.get("sector", "Default")
 
-        fair_per = eps * per if eps and per else None
-        fair_pbv = book_value * pbv if book_value and pbv else None
+        sector_per_map = {
+            "Financial Services": 12,   # Bank
+            "Consumer Defensive": 15,
+            "Consumer Cyclical": 15,
+            "Energy": 8,
+            "Real Estate": 9,
+            "Utilities": 10,
+            "Industrials": 11,
+            "Technology": 18,
+            "Basic Materials": 10,
+            "Default": 12
+        }
 
-        margin_per = ((fair_per - current_price) / current_price * 100) if fair_per else None
-        margin_pbv = ((fair_pbv - current_price) / current_price * 100) if fair_pbv else None
+        per_used = sector_per_map.get(sector, 12)
+
+        if eps is None or eps <= 0:
+            return None
+
+        fair_price = eps * per_used
+        margin = (fair_price - current_price) / current_price * 100
 
         return {
-            "EPS": round(eps, 2) if eps else None,
-            "BVPS": round(book_value, 2) if book_value else None,
-            "PER": round(per, 2) if per else None,
-            "PBV": round(pbv, 2) if pbv else None,
-            "Fair_PER": round(fair_per, 2) if fair_per else None,
-            "Fair_PBV": round(fair_pbv, 2) if fair_pbv else None,
-            "Margin_PER": round(margin_per, 1) if margin_per else None,
-            "Margin_PBV": round(margin_pbv, 1) if margin_pbv else None,
+            "EPS": round(eps, 2),
+            "PER_Sektor": per_used,
+            "Fair_Price": round(fair_price, 2),
+            "Margin": round(margin, 1),
+            "Sector": sector
         }
 
     except Exception:
@@ -455,7 +465,7 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
 
 df = pd.DataFrame(rows)
 # =====================
-# SIDEBAR OUTPUT – HARGA WAJAR REAL
+# SIDEBAR – HARGA WAJAR SIMPLE
 # =====================
 if show_fair_value and fair_search:
     ticker_search = fair_search + ".JK"
@@ -466,7 +476,7 @@ if show_fair_value and fair_search:
     if not row.empty:
         row = row.iloc[0]
 
-        fv = calculate_fair_value_real(
+        fv = calculate_fair_value_simple(
             ticker_search,
             row["Harga"]
         )
@@ -475,39 +485,24 @@ if show_fair_value and fair_search:
         st.sidebar.metric("Harga Saat Ini", row["Harga"])
 
         if fv:
-            st.sidebar.markdown("**📌 Valuasi Saham**")
-            st.sidebar.write(f"PER : {fv['PER']}")
-            st.sidebar.write(f"PBV : {fv['PBV']}")
+            st.sidebar.metric(
+                "Harga Wajar",
+                fv["Fair_Price"],
+                delta=f"{fv['Margin']}%"
+            )
 
-            st.sidebar.markdown("**💎 Harga Wajar**")
-
-            if fv["Fair_PER"] is not None:
-                st.sidebar.metric(
-                    "Versi PER",
-                    fv["Fair_PER"],
-                    delta=f"{fv['Margin_PER']}%"
-                )
-
-            if fv["Fair_PBV"] is not None:
-                st.sidebar.metric(
-                    "Versi PBV",
-                    fv["Fair_PBV"],
-                    delta=f"{fv['Margin_PBV']}%"
-                )
-
-            # Kesimpulan
-            if fv["Margin_PER"] is not None and fv["Margin_PER"] > 20:
-                st.sidebar.success("🟢 Undervalued (PER)")
-            elif fv["Margin_PBV"] is not None and fv["Margin_PBV"] < -10:
-                st.sidebar.error("🔴 Overvalued (PBV)")
+            if fv["Margin"] > 20:
+                st.sidebar.success("🟢 Undervalued")
+            elif fv["Margin"] < -10:
+                st.sidebar.error("🔴 Overvalued")
             else:
                 st.sidebar.warning("🟡 Fair Value")
 
             st.sidebar.caption(
-                f"EPS: {fv['EPS']} • BVPS: {fv['BVPS']}"
+                f"Sektor: {fv['Sector']} • EPS: {fv['EPS']} • PER: {fv['PER_Sektor']}"
             )
         else:
-            st.sidebar.warning("Data valuasi tidak tersedia")
+            st.sidebar.warning("EPS tidak tersedia")
     else:
         st.sidebar.info("Saham belum masuk hasil scanner")
 
@@ -750,6 +745,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
