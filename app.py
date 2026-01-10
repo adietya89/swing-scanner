@@ -23,6 +23,7 @@ st.set_page_config(
     page_title="Swing Trading Scanner",
     layout="wide"
 )
+st.set_option('client.showErrorDetails', False)
 st.markdown("""
 <style>
 #MainMenu {visibility: hidden;}
@@ -607,8 +608,8 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
                 "_df": df.copy()
             })
 
-        except Exception as e:
-            st.write(f"Error {t}: {e}")
+        except Exception:
+           st.warning("Data bermasalah, dilewati")
 
 df = pd.DataFrame(rows)
 # =====================
@@ -917,6 +918,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
