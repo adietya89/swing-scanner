@@ -510,21 +510,18 @@ if show_fair_value and fair_search:
         # =====================
         # SUPPORT & RESISTANCE
         # =====================
-        support, resistance = calculate_support_resistance(
-            ticker_search
-        )
+        support, resistance = calculate_support_resistance(ticker_search)
 
         if support is not None and resistance is not None:
-            st.sidebar.markdown("**📐 Support & Resistance (20 hari)**")
+           st.sidebar.markdown("**📐 Support & Resistance (20 hari)**")
 
-            st.sidebar.metric("Support", support)
-            st.sidebar.metric("Resistance", resistance)
+           st.sidebar.metric("Support", support)
+           st.sidebar.metric("Resistance", resistance)
 
-            # Posisi harga
-            if row["Harga"] <= support * 1.03:
-                st.sidebar.success("📍 Harga dekat SUPPORT")
-            elif row["Harga"] >= resistance * 0.97:
-                st.sidebar.warning("📍 Harga dekat RESISTANCE")
+           if row["Harga"] <= support * 1.03:
+              st.sidebar.success("📍 Harga dekat SUPPORT")
+           elif row["Harga"] >= resistance * 0.97:
+              st.sidebar.warning("📍 Harga dekat RESISTANCE")
 
         if fv:
             st.sidebar.metric(
@@ -787,6 +784,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
