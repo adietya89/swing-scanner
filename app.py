@@ -294,104 +294,68 @@ def S(x):
     return pd.to_numeric(x, errors='coerce').dropna()
     
 def plot_last_2_candles(df):
-    import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
+    import pandas as pd
 
     if not isinstance(df, pd.DataFrame):
-        fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
-        ax.text(0.5, 0.5, "No DataFrame", ha="center", va="center")
+        fig, ax = plt.subplots(figsize=(1.4, 1.1), dpi=160)
         ax.axis("off")
         return fig
 
-    df = df.copy()
-    for col in ["Open", "Close", "High", "Low"]:
-        if col not in df.columns:
-            df[col] = np.nan
+    df = df[["Open", "High", "Low", "Close"]].apply(
+        pd.to_numeric, errors="coerce"
+    ).dropna().tail(2)
 
-    # Filter numeric & buang row invalid
-    numeric_df = df[["Open", "Close", "High", "Low"]].apply(pd.to_numeric, errors='coerce')
-    df2 = df[numeric_df.notna().all(axis=1)].tail(2)
-
-    if df2.empty:
-        fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
-        ax.text(0.5, 0.5, "No valid candlestick", ha="center", va="center")
+    if len(df) == 0:
+        fig, ax = plt.subplots(figsize=(1.4, 1.1), dpi=160)
         ax.axis("off")
         return fig
 
-    opens = df2["Open"].to_numpy(dtype=float).flatten()
-    closes = df2["Close"].to_numpy(dtype=float).flatten()
-    highs = df2["High"].to_numpy(dtype=float).flatten()
-    lows = df2["Low"].to_numpy(dtype=float).flatten()
+    # Kalau cuma 1 candle → duplikasi
+    if len(df) == 1:
+        df = pd.concat([df, df])
 
-    # Kalau kurang dari 2, ulang baris terakhir
-    if len(df2) < 2:
-        opens = np.pad(opens, (2 - len(opens), 0), mode='edge')
-        closes = np.pad(closes, (2 - len(closes), 0), mode='edge')
-        highs = np.pad(highs, (2 - len(highs), 0), mode='edge')
-        lows = np.pad(lows, (2 - len(lows), 0), mode='edge')
+    opens  = df["Open"].to_numpy()
+    closes = df["Close"].to_numpy()
+    highs  = df["High"].to_numpy()
+    lows   = df["Low"].to_numpy()
 
-    fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
-    for i in range(2):
-        o, c, h, l = opens[i], closes[i], highs[i], lows[i]
-        color = "#00C176" if c >= o else "#FF4D4D"
-        ax.plot([i, i], [l, h], color=color, linewidth=1)
-        ax.bar(i, abs(c - o), bottom=min(o, c), width=0.35, color=color)
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_xlim(-0.6, 1.4)
-    ax.set_ylim(min(lows)*0.995, max(highs)*1.005)
-    ax.set_frame_on(False)
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-
-    return fig
-
-    if df2.empty:
-        fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
-        ax.text(0.5, 0.5, "No valid candlestick", ha="center", va="center")
-        ax.axis("off")
-        return fig
-
-    # Ambil angka murni, pastikan 1D float
-    opens = df2["Open"].to_numpy(dtype=float).flatten()
-    closes = df2["Close"].to_numpy(dtype=float).flatten()
-    highs = df2["High"].to_numpy(dtype=float).flatten()
-    lows = df2["Low"].to_numpy(dtype=float).flatten()
-
-    # Jika kurang dari 2 candlestick, ulang baris terakhir
-    if len(df2) < 2:
-        opens = np.pad(opens, (2 - len(opens), 0), mode='edge')
-        closes = np.pad(closes, (2 - len(closes), 0), mode='edge')
-        highs = np.pad(highs, (2 - len(highs), 0), mode='edge')
-        lows = np.pad(lows, (2 - len(lows), 0), mode='edge')
-
-    fig, ax = plt.subplots(figsize=(1.2, 1), dpi=140)
+    fig, ax = plt.subplots(figsize=(1.4, 1.1), dpi=160)
 
     for i in range(2):
         o, c, h, l = opens[i], closes[i], highs[i], lows[i]
         color = "#00C176" if c >= o else "#FF4D4D"
 
         # Wick
-        ax.plot([i, i], [l, h], color=color, linewidth=1)
+        ax.plot([i, i], [l, h], color=color, linewidth=1.4)
 
-        # Body
+        # Body (lebih tebal)
+        body_bottom = min(o, c)
+        body_height = max(abs(c - o), (h - l) * 0.08)
+
         ax.bar(
             i,
-            abs(c - o),
-            bottom=min(o, c),
-            width=0.35,
-            color=color
+            body_height,
+            bottom=body_bottom,
+            width=0.45,
+            color=color,
+            edgecolor=color
         )
 
-    # Axis off & batasan
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_xlim(-0.6, 1.4)
-    ax.set_ylim(min(lows)*0.995, max(highs)*1.005)
-    ax.set_frame_on(False)
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    # Padding harga (BIAR GA KEPOTONG)
+    price_min = lows.min()
+    price_max = highs.max()
+    pad = (price_max - price_min) * 0.25
 
+    ax.set_xlim(-0.6, 1.6)
+    ax.set_ylim(price_min - pad, price_max + pad)
+
+    ax.axis("off")
+    ax.set_facecolor("none")
+    fig.patch.set_alpha(0)
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
 
 def calculate_support_resistance(df, window=30):
@@ -946,6 +910,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
