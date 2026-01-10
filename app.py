@@ -29,6 +29,17 @@ st.markdown("""
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
+/* HEADER TABLE FIX */
+.table-header {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .header-box {
     background: linear-gradient(135deg, #0e1117, #151b2c);
     padding: 20px;
@@ -735,25 +746,30 @@ h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14 = st.columns(
     [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1, 0.6]
 )
 
-h1.markdown("**Kode**")
-h2.markdown("**Harga**")
-h3.markdown("**Signal**")
-h4.markdown("**Trend**")
-h5.markdown("**Zone**")
-h6.markdown("**Candle**")
-h7.markdown("**Candle Pattern**")
-h8.markdown("**MA >**")
-h9.markdown("**MACD**")
-h10.markdown("**RSI**")
-h11.markdown("**TP**")
-h12.markdown("**SL**")
-h13.markdown("**S'LINE**")
-h14.markdown("**CONF**")
+h1.markdown("<div class='table-header'>Kode</div>", unsafe_allow_html=True)
+h2.markdown("<div class='table-header'>Harga</div>", unsafe_allow_html=True)
+h3.markdown("<div class='table-header'>Signal</div>", unsafe_allow_html=True)
+h4.markdown("<div class='table-header'>Trend</div>", unsafe_allow_html=True)
+h5.markdown("<div class='table-header'>Zone</div>", unsafe_allow_html=True)
+h6.markdown(
+    "<div class='table-header'>Candle</div>",
+    unsafe_allow_html=True
+)
+h7.markdown("<div class='table-header'>Candle Pattern</div>", unsafe_allow_html=True)
+h8.markdown("<div class='table-header'>MA</div>", unsafe_allow_html=True)
+h9.markdown("<div class='table-header'>MACD</div>", unsafe_allow_html=True)
+h10.markdown("<div class='table-header'>RSI</div>", unsafe_allow_html=True)
+h11.markdown("<div class='table-header'>TP</div>", unsafe_allow_html=True)
+h12.markdown("<div class='table-header'>SL</div>", unsafe_allow_html=True)
+h13.markdown("<div class='table-header'>S'Line</div>", unsafe_allow_html=True)
+h14.markdown(
+    "<div class='table-header' style='font-size:12px'>CONF</div>",
+    unsafe_allow_html=True
+)
 
 st.divider()
 
 ROW_HEIGHT = 70
-
 # =====================
 # Kolom 1 - 9
 # =====================
@@ -930,6 +946,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
