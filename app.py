@@ -149,13 +149,6 @@ fair_search = st.sidebar.text_input(
     placeholder="BBRI / BBCA / TLKM"
 ).upper()
 
-assumed_per = st.sidebar.slider(
-    "Asumsi PER",
-    min_value=5,
-    max_value=40,
-    value=15
-)
-
 show_fair_value = st.sidebar.checkbox(
     "Tampilkan Analisa Harga Wajar",
     value=True
@@ -252,23 +245,36 @@ def plot_last_2_candles(df):
     return fig
 
 # =====================
-# HELPER – HARGA WAJAR
+# HELPER – HARGA WAJAR REAL (PER & PBV)
 # =====================
-def calculate_fair_value(ticker, current_price, assumed_per):
+def calculate_fair_value_real(ticker, current_price):
     try:
         info = yf.Ticker(ticker).info
+
         eps = info.get("trailingEps", None)
+        book_value = info.get("bookValue", None)
+        per = info.get("trailingPE", None)
+        pbv = info.get("priceToBook", None)
 
-        if eps is None or eps <= 0:
-            return None, None, None
+        fair_per = eps * per if eps and per else None
+        fair_pbv = book_value * pbv if book_value and pbv else None
 
-        fair_price = eps * assumed_per
-        margin = (fair_price - current_price) / current_price * 100
+        margin_per = ((fair_per - current_price) / current_price * 100) if fair_per else None
+        margin_pbv = ((fair_pbv - current_price) / current_price * 100) if fair_pbv else None
 
-        return round(eps, 2), round(fair_price, 2), round(margin, 1)
+        return {
+            "EPS": round(eps, 2) if eps else None,
+            "BVPS": round(book_value, 2) if book_value else None,
+            "PER": round(per, 2) if per else None,
+            "PBV": round(pbv, 2) if pbv else None,
+            "Fair_PER": round(fair_per, 2) if fair_per else None,
+            "Fair_PBV": round(fair_pbv, 2) if fair_pbv else None,
+            "Margin_PER": round(margin_per, 1) if margin_per else None,
+            "Margin_PBV": round(margin_pbv, 1) if margin_pbv else None,
+        }
 
     except Exception:
-        return None, None, None
+        return None
 
 # =====================
 # LOGIC
@@ -448,6 +454,63 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
             st.write(f"Error {t}: {e}")
 
 df = pd.DataFrame(rows)
+# =====================
+# SIDEBAR OUTPUT – HARGA WAJAR REAL
+# =====================
+if show_fair_value and fair_search:
+    ticker_search = fair_search + ".JK"
+    row = df[df["Kode"] == ticker_search]
+
+    st.sidebar.markdown("---")
+
+    if not row.empty:
+        row = row.iloc[0]
+
+        fv = calculate_fair_value_real(
+            ticker_search,
+            row["Harga"]
+        )
+
+        st.sidebar.markdown(f"### 📊 {fair_search}")
+        st.sidebar.metric("Harga Saat Ini", row["Harga"])
+
+        if fv:
+            st.sidebar.markdown("**📌 Valuasi Saham**")
+            st.sidebar.write(f"PER : {fv['PER']}")
+            st.sidebar.write(f"PBV : {fv['PBV']}")
+
+            st.sidebar.markdown("**💎 Harga Wajar**")
+
+            if fv["Fair_PER"] is not None:
+                st.sidebar.metric(
+                    "Versi PER",
+                    fv["Fair_PER"],
+                    delta=f"{fv['Margin_PER']}%"
+                )
+
+            if fv["Fair_PBV"] is not None:
+                st.sidebar.metric(
+                    "Versi PBV",
+                    fv["Fair_PBV"],
+                    delta=f"{fv['Margin_PBV']}%"
+                )
+
+            # Kesimpulan
+            if fv["Margin_PER"] is not None and fv["Margin_PER"] > 20:
+                st.sidebar.success("🟢 Undervalued (PER)")
+            elif fv["Margin_PBV"] is not None and fv["Margin_PBV"] < -10:
+                st.sidebar.error("🔴 Overvalued (PBV)")
+            else:
+                st.sidebar.warning("🟡 Fair Value")
+
+            st.sidebar.caption(
+                f"EPS: {fv['EPS']} • BVPS: {fv['BVPS']}"
+            )
+        else:
+            st.sidebar.warning("Data valuasi tidak tersedia")
+    else:
+        st.sidebar.info("Saham belum masuk hasil scanner")
+
 # =====================
 # SIDEBAR OUTPUT – HARGA WAJAR
 # =====================
@@ -729,6 +792,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
