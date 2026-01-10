@@ -790,21 +790,19 @@ for _, row in filtered_df.iterrows():
            close = row["_df"]["Close"].tail(90)
            # Paksa jadi 1D float
            if isinstance(close, pd.DataFrame):
-              close = close.iloc[:,0]
+               close = close.iloc[:, 0]
+
            close_values = pd.to_numeric(close, errors="coerce").dropna().to_numpy()
-           # ===== fallback supaya chart tidak error =====
-           if len(close_values) == 0:
-              close_values = np.array([0.5])
-               
-            min_val = close_values.min()
-            max_val = close_values.max()
-            if max_val - min_val == 0:
-                norm_values = np.full_like(close_values, 0.5, dtype=float)
-            else:
-                norm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
-                mean_val = np.mean(norm_values)
-                norm_values = norm_values - mean_val + 0.5
-                norm_values = np.clip(norm_values, 0, 1)
+
+           min_val = close_values.min()
+           max_val = close_values.max()
+           if max_val - min_val == 0:
+              norm_values = np.full_like(close_values, 0.5, dtype=float)
+           else:
+              norm_values = (close_values - close_values.min()) / (close_values.max() - close_values.min())
+              mean_val = np.mean(norm_values)
+              norm_values = norm_values - mean_val + 0.5
+              norm_values = np.clip(norm_values, 0, 1)
 
             data = pd.DataFrame({'index': range(len(norm_values)), 'close': norm_values})
 
@@ -875,6 +873,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
