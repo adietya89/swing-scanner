@@ -158,6 +158,22 @@ show_fair_value = st.sidebar.checkbox(
 # =====================
 # HELPER (ANTI ERROR)
 # =====================
+def calculate_fibonacci(df, lookback=60):
+    if df is None or len(df) < lookback:
+        return None
+
+    high = df["High"].astype(float).tail(lookback).max()
+    low  = df["Low"].astype(float).tail(lookback).min()
+
+    fib = {
+        "0.236": high - (high - low) * 0.236,
+        "0.382": high - (high - low) * 0.382,
+        "0.5":   high - (high - low) * 0.5,
+        "0.618": high - (high - low) * 0.618,
+        "0.786": high - (high - low) * 0.786,
+    }
+    return fib
+
 def distance_to_ma(close, period):
     if len(close) < period:
         return np.nan
@@ -244,18 +260,12 @@ def plot_last_2_candles(df):
 
     return fig
 
-def calculate_support_resistance(df, window=20):
-    """
-    Hitung Support & Resistance sederhana
-    """
-    if df is None or df.empty or len(df) < window:
+def calculate_support_resistance(df, window=30):
+    if df is None or len(df) < window:
         return None, None
 
-    low = df["Low"].astype(float)
-    high = df["High"].astype(float)
-
-    support = low.rolling(window).min().iloc[-1]
-    resistance = high.rolling(window).max().iloc[-1]
+    support = df["Low"].astype(float).rolling(window).min().iloc[-1]
+    resistance = df["High"].astype(float).rolling(window).max().iloc[-1]
 
     return round(support, 2), round(resistance, 2)
 
@@ -352,14 +362,21 @@ def detect_trend(close):
     return "Bullish" if ema20.iloc[-1] > ema50.iloc[-1] else "Bearish"
 
 def detect_zone(df):
-    support = S(df["Low"]).rolling(20).min().iloc[-1]
-    resistance = S(df["High"]).rolling(20).max().iloc[-1]
-    price = S(df["Close"]).iloc[-1]
+    fib = calculate_fibonacci(df)
+    support, resistance = calculate_support_resistance(df)
+    price = float(df["Close"].iloc[-1])
 
-    if price <= support * 1.03:
+    if fib is None or support is None:
+        return "MID"
+
+    # BUY AREA (area murah)
+    if fib["0.786"] <= price <= fib["0.618"] and price <= support * 1.05:
         return "BUY ZONE"
-    elif price >= resistance * 0.97:
+
+    # SELL AREA (area mahal)
+    if fib["0.382"] <= price <= fib["0.236"] and price >= resistance * 0.95:
         return "SELL ZONE"
+
     return "MID"
 
 def detect_candle(df):
@@ -445,8 +462,15 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
                 nearest_ma_dist <= 2
             )
 
-            tp = price * (1 + TP_PCT / 100)
-            sl = price * (1 - SL_PCT / 100)
+            fib = calculate_fibonacci(df)
+            support, resistance = calculate_support_resistance(df)
+
+            if fib and support and resistance:
+               tp = min(fib["0.236"], resistance)
+               sl = max(fib["0.786"], support * 0.98)
+            else:
+               tp = price * (1 + TP_PCT / 100)
+               sl = price * (1 - SL_PCT / 100)
 
             confidence = 0
             confidence += 1 if trend == "Bullish" else 0
@@ -779,6 +803,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
