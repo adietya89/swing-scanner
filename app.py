@@ -25,7 +25,6 @@ st.set_page_config(
 )
 st.markdown("""
 <style>
-header {visibility: hidden;}
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 </style>
@@ -918,6 +917,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
