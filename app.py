@@ -140,6 +140,11 @@ fake_rebound_filter = st.sidebar.checkbox(
     value=False
 )
 # =====================
+# DEFAULT VARS
+# =====================
+show_fair_value = False
+fair_search = ""
+# =====================
 # SIDEBAR MENU PILIHAN
 # =====================
 menu_option = st.sidebar.radio(
@@ -925,6 +930,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
