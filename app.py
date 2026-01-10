@@ -135,15 +135,6 @@ INTERVAL = "1d"
 
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
-st.sidebar.divider()
-
-scan_mode = st.sidebar.radio(
-    "⚡ Mode Scan",
-    ["Scan Cepat", "Scan Lengkap"],
-    index=0
-)
-
-run_scan = st.sidebar.button("🚀 Mulai Scan Saham")
 fake_rebound_filter = st.sidebar.checkbox(
     "Filter Fake Rebound",
     value=False
@@ -335,99 +326,87 @@ def detect_fake_rebound(close, df):
         return True
     return False
 
-@st.cache_data(ttl=60*60*24)
-def scan_saham(tickers, scan_mode, TP_PCT, SL_PCT):
-    rows = []
-
-    for t in tickers:
-        try:
-            df = yf.download(t, period="6mo", interval="1d", progress=False)
-
-            if df.empty or len(df) < 60:
-                continue
-
-            df = df.dropna()
-            close = df["Close"]
-
-            price = close.iloc[-1]
-
-            # ===== MODE CEPAT =====
-            if scan_mode == "Scan Cepat":
-                rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-                trend = detect_trend(close)
-
-                rows.append({
-                    "Kode": t,
-                    "Harga": round(price, 2),
-                    "Trend": trend,
-                    "RSI": round(rsi, 1),
-                    "Signal": "BUY" if rsi < 40 and trend == "Bullish" else "HOLD",
-                    "_df": df
-                })
-
-            # ===== MODE LENGKAP =====
-            else:
-                macd_signal = detect_macd_signal(close)
-                zone = detect_zone(df)
-                candle, bias = detect_candle(df)
-                rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-
-                tp = price * (1 + TP_PCT / 100)
-                sl = price * (1 - SL_PCT / 100)
-
-                rows.append({
-                    "Kode": t,
-                    "Harga": round(price, 2),
-                    "Trend": detect_trend(close),
-                    "Zone": zone,
-                    "Candle": candle,
-                    "RSI": round(rsi, 1),
-                    "MACD": macd_signal,
-                    "TP": round(tp, 2),
-                    "SL": round(sl, 2),
-                    "Signal": "BUY" if zone == "BUY ZONE" else "HOLD",
-                    "_df": df
-                })
-
-        except:
-            pass
-
-    return pd.DataFrame(rows)
-
 # =====================
 # DATA PROCESS
 # =====================
 rows = []
 
-if not run_scan:
-    st.info("👈 Klik tombol **Mulai Scan Saham** di kiri untuk mulai")
-    st.stop()
+with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa menit !!! 😁😁😁"):
+    for t in TICKERS:
+        try:
+            df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            if df.empty or len(df) < 60:
+                continue
 
-if not run_scan:
-    st.info("👈 Pilih mode scan lalu klik **Mulai Scan Saham**")
-    st.stop()
+            df = df.dropna()
+            close = S(df["Close"])
+            try:
+                intraday = yf.Ticker(t).history(period="1d", interval="1m")
+                if not intraday.empty:
+                   price = intraday["Close"].iloc[-1]
+                else:
+                   price = close.iloc[-1]
+            except Exception:
+                   price = close.iloc[-1]
+            macd_signal = detect_macd_signal(close)
+            dist_ma20 = distance_to_ma(close, 20)
+            dist_ma50 = distance_to_ma(close, 50)
+            nearest_ma_dist = np.nanmin([dist_ma20, dist_ma50])
+            ma_pos = detect_ma_position(close)
 
-with st.spinner("⏳ Scan saham berjalan..."):
-    df = scan_saham(TICKERS, scan_mode, TP_PCT, SL_PCT)
+            trend = detect_trend(close)
+            zone = detect_zone(df)
+            candle, bias = detect_candle(df)
+            rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+            signal = build_signal(zone, bias, trend)
+            buy_filter = (
+                macd_signal == "Golden Cross" and
+                rsi <= 50 and
+                nearest_ma_dist <= 2
+            )
 
-# Lengkapi kolom biar UI aman
-default_cols = {
-    "Zone": "-",
-    "Candle": "-",
-    "MACD": "-",
-    "TP": 0,
-    "SL": 0,
-    "MA_Pos": "-",
-    "Confidence": 0,
-    "BUY_Filter": False,
-    "SELL_Filter": False,
-    "Fake_Rebound": False
-}
+            sell_filter = (
+                macd_signal == "Death Cross" and
+                rsi >= 70 and
+                nearest_ma_dist <= 2
+            )
 
-for col, val in default_cols.items():
-    if col not in df.columns:
-        df[col] = val
+            tp = price * (1 + TP_PCT / 100)
+            sl = price * (1 - SL_PCT / 100)
 
+            confidence = 0
+            confidence += 1 if trend == "Bullish" else 0
+            confidence += 1 if zone == "BUY ZONE" else 0
+            confidence += 1 if bias == "Bullish" else 0
+            confidence += 1 if rsi < 40 else 0
+            
+            fake_rebound = detect_fake_rebound(close, df)
+            rows.append({
+                "Kode": t,
+                "Harga": round(price, 2),
+                "Signal": "BUY" if signal == "BUY" else "HOLD",
+                "Trend": trend,
+                "Zone": zone,
+                "Candle": candle,
+                "RSI": round(rsi, 1),
+                "MA_Pos": ma_pos,
+                "MACD": macd_signal,
+                "TP": round(tp, 2),
+                "SL": round(sl, 2),
+                "Confidence": confidence,
+                "BUY_Filter": buy_filter,
+                "SELL_Filter": sell_filter,
+                "MA_Dist(%)": round(nearest_ma_dist, 2),
+                "Fake_Rebound": fake_rebound,
+                "_df": df.copy()
+            })
+
+        except Exception as e:
+            st.write(f"Error {t}: {e}")
+
+df = pd.DataFrame(rows)
 df["Fake_Rebound"] = df["Fake_Rebound"].astype(bool)
 df = df.sort_values(
     by=["Confidence", "Signal", "RSI"],
@@ -488,28 +467,7 @@ ROW_HEIGHT = 70
 # =====================
 # Kolom 1 - 9
 # =====================
-# Default: tabel KOSONG
-filtered_df = pd.DataFrame()
-
-# Jika user klik filter
-if st.session_state.trade_filter == "ALL":
-    filtered_df = df.copy()
-
-elif st.session_state.trade_filter == "BUY":
-    filtered_df = df[df["BUY_Filter"]]
-
-elif st.session_state.trade_filter == "SELL":
-    filtered_df = df[df["SELL_Filter"]]
-
-# Jika user pakai search
-if search_code:
-    filtered_df = df[
-        df["Kode"].str.contains(search_code, case=False)
-    ]
-
-# Filter fake rebound
-if fake_rebound_filter and not filtered_df.empty:
-    filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
+filtered_df = df.copy()
 
 if st.session_state.trade_filter == "BUY":
     filtered_df = df[df["BUY_Filter"]]
@@ -526,10 +484,6 @@ if search_code:
 # Filter fake rebound
 if fake_rebound_filter:
     filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
-
-if filtered_df.empty:
-    st.info("🔎 Silakan pilih filter (ALL / BUY / SELL) atau cari kode saham")
-    st.stop()
 
 for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
@@ -692,24 +646,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
