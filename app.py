@@ -794,17 +794,26 @@ for _, row in filtered_df.iterrows():
     )
 
     with c1:
-        st.write(row["Kode"].replace(".JK",""))
-
+        st.markdown(
+           f"<div class='table-cell'><b>{row['Kode'].replace('.JK','')}</b></div>",
+           unsafe_allow_html=True
+        )
     with c2:
-        st.write(row["Harga"])
-
+        st.markdown(
+           f"<div class='table-cell'>{row['Harga']}</div>",
+           unsafe_allow_html=True
+        )
     with c3:
-        if row["Signal"] == "BUY":
-            st.markdown("<span style='color:#00C176; font-weight:bold'>BUY</span>", unsafe_allow_html=True)
-        else:
-            st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
-
+       if row["Signal"] == "BUY":
+          st.markdown(
+            "<div class='table-cell' style='color:#00C176; font-weight:800'>BUY</div>",
+            unsafe_allow_html=True
+          )
+       else:
+          st.markdown(
+            "<div class='table-cell' style='color:#999'>HOLD</div>",
+            unsafe_allow_html=True
+          )
     with c4:
         if row["Trend"] == "Bullish":
             st.markdown("<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>", unsafe_allow_html=True)
@@ -821,7 +830,9 @@ for _, row in filtered_df.iterrows():
 
     with c6:
         fig = plot_last_2_candles(row["_df"])
+        st.markdown("<div class='table-cell'>", unsafe_allow_html=True)
         st.pyplot(fig, clear_figure=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with c7:
         candle_pattern, bias = detect_candle(row["_df"])
@@ -943,6 +954,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
