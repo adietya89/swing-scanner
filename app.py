@@ -139,6 +139,28 @@ fake_rebound_filter = st.sidebar.checkbox(
     "Filter Fake Rebound",
     value=False
 )
+# =====================
+# SIDEBAR – HARGA WAJAR SAHAM
+# =====================
+st.sidebar.markdown("## 💎 Harga Wajar Saham")
+
+fair_search = st.sidebar.text_input(
+    "🔍 Cari Kode Saham",
+    placeholder="BBRI / BBCA / TLKM"
+).upper()
+
+assumed_per = st.sidebar.slider(
+    "Asumsi PER",
+    min_value=5,
+    max_value=40,
+    value=15
+)
+
+show_fair_value = st.sidebar.checkbox(
+    "Tampilkan Analisa Harga Wajar",
+    value=True
+)
+
 
 # =====================
 # HELPER (ANTI ERROR)
@@ -228,6 +250,25 @@ def plot_last_2_candles(df):
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     return fig
+
+# =====================
+# HELPER – HARGA WAJAR
+# =====================
+def calculate_fair_value(ticker, current_price, assumed_per):
+    try:
+        info = yf.Ticker(ticker).info
+        eps = info.get("trailingEps", None)
+
+        if eps is None or eps <= 0:
+            return None, None, None
+
+        fair_price = eps * assumed_per
+        margin = (fair_price - current_price) / current_price * 100
+
+        return round(eps, 2), round(fair_price, 2), round(margin, 1)
+
+    except Exception:
+        return None, None, None
 
 # =====================
 # LOGIC
@@ -407,6 +448,48 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
             st.write(f"Error {t}: {e}")
 
 df = pd.DataFrame(rows)
+# =====================
+# SIDEBAR OUTPUT – HARGA WAJAR
+# =====================
+if show_fair_value and fair_search:
+    ticker_search = fair_search + ".JK"
+    row = df[df["Kode"] == ticker_search]
+
+    st.sidebar.markdown("---")
+
+    if not row.empty:
+        row = row.iloc[0]
+        eps, fair_price, margin = calculate_fair_value(
+            ticker_search,
+            row["Harga"],
+            assumed_per
+        )
+
+        st.sidebar.markdown(f"### 📊 {fair_search}")
+        st.sidebar.metric("Harga Saat Ini", row["Harga"])
+
+        if fair_price:
+            st.sidebar.metric(
+                "Harga Wajar",
+                fair_price,
+                delta=f"{margin}%"
+            )
+
+            if margin > 20:
+                st.sidebar.success("🟢 Undervalued")
+            elif margin < -10:
+                st.sidebar.error("🔴 Overvalued")
+            else:
+                st.sidebar.warning("🟡 Fair Value")
+
+            st.sidebar.caption(
+                f"EPS: {eps} • PER Asumsi: {assumed_per}"
+            )
+        else:
+            st.sidebar.warning("Data EPS tidak tersedia")
+    else:
+        st.sidebar.info("Saham belum masuk hasil scanner")
+
 df["Fake_Rebound"] = df["Fake_Rebound"].astype(bool)
 df = df.sort_values(
     by=["Confidence", "Signal", "RSI"],
@@ -646,6 +729,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
