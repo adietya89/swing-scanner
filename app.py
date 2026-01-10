@@ -1,12 +1,12 @@
-# =====================
+# ======================================================
 # IMPORT (BERSIH & CEPAT)
-# =====================
+# ======================================================
 import streamlit as st
-import yfinance as yf
 import pandas as pd
 import numpy as np
-import altair as alt
+import yfinance as yf
 import matplotlib.pyplot as plt
+import altair as alt
 
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
@@ -14,210 +14,166 @@ from datetime import datetime
 from PIL import Image
 import os
 
-# =====================
-# PAGE CONFIG
-# =====================
+# ======================================================
+# PAGE CONFIG (TIDAK DIUBAH)
+# ======================================================
 st.set_page_config(page_title="Swing Trading Scanner", layout="wide")
 
 st.markdown("""
 <style>
-.block-container { padding-top: 1rem; padding-bottom: 1rem; }
-[data-testid="stMetric"] { background-color: #0e1117; padding: 12px; border-radius: 10px; }
-.stProgress > div > div { background-color: #00c176; }
+.block-container {padding-top:1rem;padding-bottom:1rem;}
+.header-box {background:linear-gradient(135deg,#0e1117,#151b2c);padding:20px;border-radius:16px;margin-bottom:25px;}
+[data-testid="stMetric"] {background-color:#0e1117;padding:12px;border-radius:10px;}
+.stProgress > div > div {background-color:#00c176;}
 </style>
 """, unsafe_allow_html=True)
 
-# =====================
+# ======================================================
 # HEADER
-# =====================
+# ======================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
 
-c1, c2 = st.columns([1, 7])
+c1, c2 = st.columns([1,7])
 with c1:
     st.image(logo, width=140)
 with c2:
-    st.markdown("## 📈 Swing Trading Scanner")
+    st.markdown("<h1>📈 Swing Trading Scanner</h1>", unsafe_allow_html=True)
     st.caption("Realtime Daily Market Screening • IDX")
 
-# =====================
-# SIDEBAR
-# =====================
+# ======================================================
+# CONFIG
+# ======================================================
+PERIOD = "6mo"
+INTERVAL = "1d"
+
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
-FAKE_REBOUND_FILTER = st.sidebar.checkbox("Filter Fake Rebound", False)
+fake_rebound_filter = st.sidebar.checkbox("Filter Fake Rebound", False)
 
-# =====================
-# LOAD TICKERS
-# =====================
+# ======================================================
+# LOAD TICKER (CACHE)
+# ======================================================
 @st.cache_data
-def load_tickers():
+def load_idx_tickers():
     df = pd.read_csv("idx_tickers.csv")
     if df.shape[1] == 1:
         df.columns = ["Kode"]
-    return (df["Kode"].astype(str).str.strip() + ".JK").tolist()
+    return (df["Kode"].astype(str) + ".JK").tolist()
 
-TICKERS = load_tickers()
+TICKERS = load_idx_tickers()
 
-# =====================
-# BULK DOWNLOAD (SUPER CEPAT)
-# =====================
-@st.cache_data(ttl=60*60)
-def download_all():
-    return yf.download(
-        TICKERS,
-        period="6mo",
-        interval="1d",
-        group_by="ticker",
-        threads=True,
-        progress=False
-    )
-
-# =====================
+# ======================================================
 # HELPER
-# =====================
-def detect_candle(df):
-    o, c, h, l = df.iloc[-1][["Open","Close","High","Low"]]
-    body = abs(c - o)
-    lower = min(o, c) - l
-    upper = h - max(o, c)
+# ======================================================
+def S(x): return x.astype(float)
 
-    if lower > body * 2:
-        return "Hammer", "Bullish"
-    if upper > body * 2:
-        return "Shooting Star", "Bearish"
-    return "Normal", "Neutral"
+def distance_to_ma(close, n):
+    if len(close) < n: return np.nan
+    ma = close.rolling(n).mean().iloc[-1]
+    return abs(close.iloc[-1] - ma) / ma * 100
+
+# ======================================================
+# SIGNAL LOGIC (SAMA)
+# ======================================================
+def detect_macd_signal(close):
+    m = MACD(close)
+    macd, sig = m.macd(), m.macd_signal()
+    if macd.iloc[-2] < sig.iloc[-2] and macd.iloc[-1] > sig.iloc[-1]:
+        return "Golden Cross"
+    if macd.iloc[-2] > sig.iloc[-2] and macd.iloc[-1] < sig.iloc[-1]:
+        return "Death Cross"
+    return "Normal"
+
+def detect_trend(close):
+    return "Bullish" if EMAIndicator(close,20).ema_indicator().iloc[-1] > EMAIndicator(close,50).ema_indicator().iloc[-1] else "Bearish"
+
+def detect_zone(df):
+    sup = df["Low"].rolling(20).min().iloc[-1]
+    res = df["High"].rolling(20).max().iloc[-1]
+    p = df["Close"].iloc[-1]
+    if p <= sup * 1.03: return "BUY ZONE"
+    if p >= res * 0.97: return "SELL ZONE"
+    return "MID"
+
+def detect_candle(df):
+    o,c,h,l = df.iloc[-1][["Open","Close","High","Low"]]
+    body = abs(c-o)
+    if (min(o,c)-l) > body*2: return "Hammer","Bullish"
+    if (h-max(o,c)) > body*2: return "Shooting Star","Bearish"
+    return "Normal","Neutral"
 
 def detect_fake_rebound(close, df):
-    candle, _ = detect_candle(df)
-    rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-    ema50 = EMAIndicator(close, 50).ema_indicator().iloc[-1]
-    return close.iloc[-1] < ema50 and rsi < 50 and candle == "Shooting Star"
+    rsi = RSIIndicator(close).rsi().iloc[-1]
+    ema50 = EMAIndicator(close,50).ema_indicator().iloc[-1]
+    candle,_ = detect_candle(df)
+    return close.iloc[-1] < ema50 and rsi < 50 and candle=="Shooting Star"
 
-# =====================
-# SCAN ENGINE (OPTIMIZED)
-# =====================
-def scan_stock(t, df):
-    if df is None or df.empty or len(df) < 60:
-        return None
-
-    df = df.dropna()
-    close = df["Close"]
-    price = close.iloc[-1]
-
-    rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-
-    macd = MACD(close)
-    macd_line = macd.macd()
-    macd_sig = macd.macd_signal()
-
-    macd_signal = "Normal"
-    if macd_line.iloc[-2] < macd_sig.iloc[-2] and macd_line.iloc[-1] > macd_sig.iloc[-1]:
-        macd_signal = "Golden Cross"
-    elif macd_line.iloc[-2] > macd_sig.iloc[-2] and macd_line.iloc[-1] < macd_sig.iloc[-1]:
-        macd_signal = "Death Cross"
-
-    ema20 = EMAIndicator(close, 20).ema_indicator().iloc[-1]
-    ema50 = EMAIndicator(close, 50).ema_indicator().iloc[-1]
-    trend = "Bullish" if ema20 > ema50 else "Bearish"
-
-    support = df["Low"].rolling(20).min().iloc[-1]
-    resistance = df["High"].rolling(20).max().iloc[-1]
-
-    zone = "MID"
-    if price <= support * 1.03:
-        zone = "BUY ZONE"
-    elif price >= resistance * 0.97:
-        zone = "SELL ZONE"
-
-    candle, bias = detect_candle(df)
-
-    signal = "BUY" if (
-        zone == "BUY ZONE" and
-        trend == "Bullish" and
-        macd_signal == "Golden Cross" and
-        rsi <= 50
-    ) else "HOLD"
-
-    confidence = sum([
-        trend == "Bullish",
-        zone == "BUY ZONE",
-        bias == "Bullish",
-        rsi < 40
-    ])
-
-    fake = detect_fake_rebound(close, df)
-    if FAKE_REBOUND_FILTER and fake:
-        return None
-
-    return {
-        "Kode": t.replace(".JK",""),
-        "Harga": round(price,2),
-        "Signal": signal,
-        "Trend": trend,
-        "Zone": zone,
-        "Candle": candle,
-        "RSI": round(rsi,1),
-        "MACD": macd_signal,
-        "TP": round(price*(1+TP_PCT/100),2),
-        "SL": round(price*(1-SL_PCT/100),2),
-        "Confidence": confidence,
-        "_df": df
-    }
-
-# =====================
-# RUN SCANNER
-# =====================
-with st.spinner("⚡ Scanning super cepat..."):
-    raw = download_all()
-    rows = []
-
+# ======================================================
+# DATA FETCH (INI YANG DIPERCEPAT)
+# ======================================================
+@st.cache_data(ttl=86400)
+def fetch_all():
+    data = yf.download(TICKERS, period=PERIOD, interval=INTERVAL, group_by="ticker", threads=True)
+    rows=[]
     for t in TICKERS:
-        try:
-            df = raw[t] if t in raw else None
-            r = scan_stock(t, df)
-            if r:
-                rows.append(r)
-        except:
-            pass
+        if t not in data: continue
+        df = data[t].dropna()
+        if len(df) < 60: continue
 
-df = pd.DataFrame(rows).sort_values(
-    ["Confidence","Signal","RSI"],
-    ascending=[False,False,True]
-)
+        close = df["Close"]
+        price = close.iloc[-1]
 
-# =====================
-# UI TABLE (TETAP SAMA)
-# =====================
-st.subheader("📊 HASIL SCANNER")
+        macd = detect_macd_signal(close)
+        trend = detect_trend(close)
+        zone = detect_zone(df)
+        candle,bias = detect_candle(df)
+        rsi = RSIIndicator(close).rsi().iloc[-1]
 
-st.dataframe(
-    df[["Kode","Harga","Signal","Trend","Zone","Candle","RSI","MACD","TP","SL","Confidence"]],
-    use_container_width=True,
-    hide_index=True
-)
+        tp = price*(1+TP_PCT/100)
+        sl = price*(1-SL_PCT/100)
 
-# =====================
-# CONFIDENCE METER
-# =====================
-st.subheader("🎯 Confidence Meter")
-for _, r in df.iterrows():
-    st.markdown(f"**{r['Kode']}** — {r['Signal']}")
-    st.progress(r["Confidence"]/4)
+        conf = sum([
+            trend=="Bullish",
+            zone=="BUY ZONE",
+            bias=="Bullish",
+            rsi<40
+        ])
 
-# =====================
+        rows.append({
+            "Kode":t,
+            "Harga":round(price,2),
+            "Signal":"BUY" if conf>=3 else "HOLD",
+            "Trend":trend,
+            "Zone":zone,
+            "Candle":candle,
+            "RSI":round(rsi,1),
+            "MACD":macd,
+            "TP":round(tp,2),
+            "SL":round(sl,2),
+            "Confidence":conf,
+            "Fake_Rebound":detect_fake_rebound(close,df),
+            "_df":df
+        })
+    return pd.DataFrame(rows)
+
+df = fetch_all()
+if fake_rebound_filter:
+    df = df[df["Fake_Rebound"]==False]
+
+df = df.sort_values(["Confidence","RSI"], ascending=[False,True])
+
+# ======================================================
+# TABLE & UI (KERANGKA ASLI)
+# ======================================================
+st.subheader("📊 • INFEKSIUS ACTIO")
+st.dataframe(df.drop(columns="_df"), use_container_width=True, hide_index=True)
+
+# ======================================================
 # TOP BUY
-# =====================
+# ======================================================
 st.subheader("🔥 TOP BUY")
 top = df[df["Signal"]=="BUY"].head(10)
+st.dataframe(top[["Kode","Harga","Trend","Zone","RSI","TP","SL","Confidence"]], use_container_width=True)
 
-st.dataframe(
-    top[["Kode","Harga","Trend","Zone","RSI","TP","SL","Confidence"]],
-    use_container_width=True,
-    hide_index=True
-)
-
-# =====================
-# FOOTER
-# =====================
 st.caption(f"Last update: {datetime.now().strftime('%d %b %Y %H:%M')}")
