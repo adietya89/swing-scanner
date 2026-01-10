@@ -804,7 +804,7 @@ for _, row in filtered_df.iterrows():
               norm_values = norm_values - mean_val + 0.5
               norm_values = np.clip(norm_values, 0, 1)
 
-            data = pd.DataFrame({'index': range(len(norm_values)), 'close': norm_values})
+           data = pd.DataFrame({'index': range(len(norm_values)), 'close': norm_values})
 
             trend_color = "#999"
             if close_values[-1] > close_values[0]:
@@ -873,6 +873,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
