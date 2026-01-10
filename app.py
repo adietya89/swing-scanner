@@ -25,6 +25,14 @@ st.set_page_config(
 )
 st.markdown("""
 <style>
+header {visibility: hidden;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
 .block-container {
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -910,6 +918,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
