@@ -478,7 +478,12 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
                    df[col] = pd.to_numeric(df[col], errors="coerce")
 
             df = df.dropna(subset=["Open", "High", "Low", "Close"])
-
+            
+            # Kalau data kosong, skip saham ini
+            if df.empty or len(df) < 60:
+               st.write(f"Skip {t}, data tidak cukup")
+               continue
+                
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
             if df.empty or len(df) < 60:
@@ -497,10 +502,13 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
             macd_signal = detect_macd_signal(close)
             dist_ma20 = distance_to_ma(close, 20)
             dist_ma50 = distance_to_ma(close, 50)
+            
+            # ===== SAFE VERSION =====
             nearest_ma_dist = np.nanmin([
                 float(dist_ma20) if np.isscalar(dist_ma20) else np.nan,
                 float(dist_ma50) if np.isscalar(dist_ma50) else np.nan
             ])
+            
             ma_pos = detect_ma_position(close)
             trend = detect_trend(close)
             zone = detect_zone(df)
@@ -779,9 +787,15 @@ for _, row in filtered_df.iterrows():
     with c13:
         # Sparkline (Altair chart)
         try:
-            close = row["_df"]["Close"].tail(90)
-            close_values = close.squeeze().to_numpy()
-
+           close = row["_df"]["Close"].tail(90)
+           # Paksa jadi 1D float
+           if isinstance(close, pd.DataFrame):
+              close = close.iloc[:,0]
+           close_values = pd.to_numeric(close, errors="coerce").dropna().to_numpy()
+           # ===== fallback supaya chart tidak error =====
+           if len(close_values) == 0:
+              close_values = np.array([0.5])
+               
             min_val = close_values.min()
             max_val = close_values.max()
             if max_val - min_val == 0:
@@ -861,6 +875,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
