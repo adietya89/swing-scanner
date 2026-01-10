@@ -287,6 +287,29 @@ def calculate_fair_value_simple(ticker, current_price):
         return None
 
 # =====================
+# HELPER – SUPPORT & RESISTANCE SIMPLE
+# =====================
+def calculate_support_resistance(ticker, period=20):
+    try:
+        data = yf.download(
+            ticker,
+            period=f"{period}d",
+            interval="1d",
+            progress=False
+        )
+
+        if data.empty:
+            return None, None
+
+        support = data["Low"].min()
+        resistance = data["High"].max()
+
+        return round(support, 2), round(resistance, 2)
+
+    except Exception:
+        return None, None
+
+# =====================
 # LOGIC
 # =====================
 def detect_macd_signal(close):
@@ -483,6 +506,25 @@ if show_fair_value and fair_search:
 
         st.sidebar.markdown(f"### 📊 {fair_search}")
         st.sidebar.metric("Harga Saat Ini", row["Harga"])
+        
+        # =====================
+        # SUPPORT & RESISTANCE
+        # =====================
+        support, resistance = calculate_support_resistance(
+            ticker_search
+        )
+
+        if support and resistance:
+            st.sidebar.markdown("**📐 Support & Resistance (20 hari)**")
+
+            st.sidebar.metric("Support", support)
+            st.sidebar.metric("Resistance", resistance)
+
+            # Posisi harga
+            if row["Harga"] <= support * 1.03:
+                st.sidebar.success("📍 Harga dekat SUPPORT")
+            elif row["Harga"] >= resistance * 0.97:
+                st.sidebar.warning("📍 Harga dekat RESISTANCE")
 
         if fv:
             st.sidebar.metric(
@@ -745,6 +787,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
