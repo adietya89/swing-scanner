@@ -59,23 +59,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-.header-box {
-    background: linear-gradient(135deg, #0e1117, #151b2c);
-    padding: 20px;
-    border-radius: 16px;
-    margin-bottom: 25px;
-}
-[data-testid="stMetric"] {
-    background-color: #0e1117;
-    padding: 12px;
-    border-radius: 10px;
-}
-.stProgress > div > div {
-    background-color: #00c176;
-}
-</style>
-""", unsafe_allow_html=True)
-
 # =====================
 # HEADER IMAGE (LOGO + TITLE)
 # =====================
@@ -960,6 +943,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
