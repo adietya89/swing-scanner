@@ -410,63 +410,24 @@ if not run_scan:
 with st.spinner("⏳ Scan saham berjalan..."):
     df = scan_saham(TICKERS, scan_mode, TP_PCT, SL_PCT)
 
-            macd_signal = detect_macd_signal(close)
-            dist_ma20 = distance_to_ma(close, 20)
-            dist_ma50 = distance_to_ma(close, 50)
-            nearest_ma_dist = np.nanmin([dist_ma20, dist_ma50])
-            ma_pos = detect_ma_position(close)
+# Lengkapi kolom biar UI aman
+default_cols = {
+    "Zone": "-",
+    "Candle": "-",
+    "MACD": "-",
+    "TP": 0,
+    "SL": 0,
+    "MA_Pos": "-",
+    "Confidence": 0,
+    "BUY_Filter": False,
+    "SELL_Filter": False,
+    "Fake_Rebound": False
+}
 
-            trend = detect_trend(close)
-            zone = detect_zone(df)
-            candle, bias = detect_candle(df)
-            rsi = RSIIndicator(close, 14).rsi().iloc[-1]
-            signal = build_signal(zone, bias, trend)
-            buy_filter = (
-                macd_signal == "Golden Cross" and
-                rsi <= 50 and
-                nearest_ma_dist <= 2
-            )
+for col, val in default_cols.items():
+    if col not in df.columns:
+        df[col] = val
 
-            sell_filter = (
-                macd_signal == "Death Cross" and
-                rsi >= 70 and
-                nearest_ma_dist <= 2
-            )
-
-            tp = price * (1 + TP_PCT / 100)
-            sl = price * (1 - SL_PCT / 100)
-
-            confidence = 0
-            confidence += 1 if trend == "Bullish" else 0
-            confidence += 1 if zone == "BUY ZONE" else 0
-            confidence += 1 if bias == "Bullish" else 0
-            confidence += 1 if rsi < 40 else 0
-            
-            fake_rebound = detect_fake_rebound(close, df)
-            rows.append({
-                "Kode": t,
-                "Harga": round(price, 2),
-                "Signal": "BUY" if signal == "BUY" else "HOLD",
-                "Trend": trend,
-                "Zone": zone,
-                "Candle": candle,
-                "RSI": round(rsi, 1),
-                "MA_Pos": ma_pos,
-                "MACD": macd_signal,
-                "TP": round(tp, 2),
-                "SL": round(sl, 2),
-                "Confidence": confidence,
-                "BUY_Filter": buy_filter,
-                "SELL_Filter": sell_filter,
-                "MA_Dist(%)": round(nearest_ma_dist, 2),
-                "Fake_Rebound": fake_rebound,
-                "_df": df.copy()
-            })
-
-        except Exception as e:
-            st.write(f"Error {t}: {e}")
-
-df = pd.DataFrame(rows)
 df["Fake_Rebound"] = df["Fake_Rebound"].astype(bool)
 df = df.sort_values(
     by=["Confidence", "Signal", "RSI"],
@@ -731,6 +692,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
