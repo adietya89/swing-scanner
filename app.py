@@ -467,7 +467,28 @@ ROW_HEIGHT = 70
 # =====================
 # Kolom 1 - 9
 # =====================
-filtered_df = df.copy()
+# Default: tabel KOSONG
+filtered_df = pd.DataFrame()
+
+# Jika user klik filter
+if st.session_state.trade_filter == "ALL":
+    filtered_df = df.copy()
+
+elif st.session_state.trade_filter == "BUY":
+    filtered_df = df[df["BUY_Filter"]]
+
+elif st.session_state.trade_filter == "SELL":
+    filtered_df = df[df["SELL_Filter"]]
+
+# Jika user pakai search
+if search_code:
+    filtered_df = df[
+        df["Kode"].str.contains(search_code, case=False)
+    ]
+
+# Filter fake rebound
+if fake_rebound_filter and not filtered_df.empty:
+    filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
 
 if st.session_state.trade_filter == "BUY":
     filtered_df = df[df["BUY_Filter"]]
@@ -484,6 +505,10 @@ if search_code:
 # Filter fake rebound
 if fake_rebound_filter:
     filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
+
+if filtered_df.empty:
+    st.info("🔎 Silakan pilih filter (ALL / BUY / SELL) atau cari kode saham")
+    st.stop()
 
 for _, row in filtered_df.iterrows():
     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
@@ -646,6 +671,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
