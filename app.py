@@ -561,13 +561,7 @@ if show_fair_value and fair_search:
             ticker_search,
             row["Harga"]
         )
-
-        # ===== CHART FIBO + SNR =====
-        st.sidebar.markdown("### 📈 Chart Fibo & SNR")
-
-        fig = plot_price_fibo_snr(row["_df"], ticker_search)
-        st.sidebar.pyplot(fig)
-
+        
         # ===== SUPPORT & RESISTANCE =====
         support, resistance = calculate_support_resistance(row["_df"])
 
@@ -590,6 +584,12 @@ if show_fair_value and fair_search:
         else:
             st.sidebar.warning("EPS tidak tersedia")
 
+        # ===== CHART FIBO + SNR =====
+        st.sidebar.markdown("### 📈 Chart Fibo & SNR")
+
+        fig = plot_price_fibo_snr(row["_df"], ticker_search)
+        st.sidebar.pyplot(fig)
+        
         # ===== TAMPIL SUPPORT & RESISTANCE =====
         st.sidebar.markdown("### 🧱 Support & Resistance")
 
@@ -850,6 +850,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
