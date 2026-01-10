@@ -5,46 +5,34 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import altair as alt
-
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from datetime import datetime
-from PIL import Image
-import os
 
 # =====================
 # PAGE CONFIG
 # =====================
 st.set_page_config(
-    page_title="Swing Trading Scanner",
+    page_title="IDX Swing Trading Scanner",
     layout="wide"
 )
 
-# =====================
-# STYLE
-# =====================
 st.markdown("""
 <style>
-.block-container { padding-top: 1rem; padding-bottom: 1rem; }
-[data-testid="stMetric"] { background-color: #0e1117; padding: 12px; border-radius: 10px; }
-.stProgress > div > div { background-color: #00c176; }
+.block-container { padding-top: 1rem; }
+[data-testid="stMetric"] {
+    background-color: #0e1117;
+    padding: 12px;
+    border-radius: 10px;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # =====================
 # HEADER
 # =====================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-logo = Image.open(os.path.join(BASE_DIR, "logo.png"))
-
-c1, c2 = st.columns([1, 7])
-with c1:
-    st.image(logo, width=140)
-with c2:
-    st.markdown("## 📈 Swing Trading Scanner")
-    st.caption("IDX • Daily Swing Strategy • 2026")
+st.title("📈 IDX Swing Trading Scanner")
+st.caption("Scanner teknikal harian + harga wajar sederhana | Bukan rekomendasi beli")
 
 # =====================
 # CONFIG
@@ -55,65 +43,62 @@ INTERVAL = "1d"
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 
+show_fair_value = st.sidebar.checkbox("Tampilkan Harga Wajar", True)
+search_fair = st.sidebar.text_input("Cari Harga Wajar (BBRI / BBCA)").upper()
+
 # =====================
-# LOAD TICKERS
+# LOAD TICKER IDX
 # =====================
 @st.cache_data
-def load_idx_tickers():
+def load_tickers():
     df = pd.read_csv("idx_tickers.csv")
-    if df.shape[1] == 1:
-        df.columns = ["Kode"]
-    return (df["Kode"].astype(str).str.strip() + ".JK").tolist()
+    df.columns = ["Kode"]
+    return (df["Kode"].str.strip() + ".JK").tolist()
 
-TICKERS = load_idx_tickers()
+TICKERS = load_tickers()
 
 # =====================
 # HELPER
 # =====================
 def S(x):
-    return pd.to_numeric(x, errors="coerce").astype(float)
-
-def calculate_support_resistance(ticker, period=20):
-    df = yf.download(ticker, period=f"{period}d", interval="1d", progress=False)
-    if df.empty:
-        return None, None
-    return float(df["Low"].min()), float(df["High"].max())
-
-def calculate_fair_value_simple(ticker, price):
-    info = yf.Ticker(ticker).info
-    eps = info.get("trailingEps")
-    sector = info.get("sector", "Default")
-
-    per_map = {
-        "Financial Services": 12,
-        "Technology": 18,
-        "Energy": 8,
-        "Industrials": 11,
-        "Default": 12
-    }
-
-    if eps is None or eps <= 0:
-        return None
-
-    per = per_map.get(sector, 12)
-    fair = eps * per
-    margin = (fair - price) / price * 100
-
-    return {
-        "Fair": round(fair, 2),
-        "Margin": round(margin, 1),
-        "EPS": round(eps, 2),
-        "PER": per,
-        "Sector": sector
-    }
+    return x.astype(float)
 
 def detect_trend(close):
     ema20 = EMAIndicator(close, 20).ema_indicator()
     ema50 = EMAIndicator(close, 50).ema_indicator()
     return "Bullish" if ema20.iloc[-1] > ema50.iloc[-1] else "Bearish"
 
+def detect_macd(close):
+    macd = MACD(close)
+    if macd.macd().iloc[-1] > macd.macd_signal().iloc[-1]:
+        return "Bullish"
+    return "Bearish"
+
+def detect_zone(df):
+    support = df["Low"].rolling(20).min().iloc[-1]
+    resistance = df["High"].rolling(20).max().iloc[-1]
+    price = df["Close"].iloc[-1]
+    if price <= support * 1.03:
+        return "BUY ZONE"
+    elif price >= resistance * 0.97:
+        return "SELL ZONE"
+    return "MID"
+
+def fair_value_simple(ticker, price):
+    try:
+        info = yf.Ticker(ticker).info
+        eps = info.get("trailingEps", None)
+        if eps is None or eps <= 0:
+            return None
+        per = 12
+        fair = eps * per
+        margin = (fair - price) / price * 100
+        return round(fair,2), round(margin,1)
+    except:
+        return None
+
 # =====================
-# DATA PROCESS
+# PROCESS DATA
 # =====================
 rows = []
 
@@ -125,98 +110,87 @@ with st.spinner("⏳ Mengambil data saham IDX..."):
                 continue
 
             close = S(df["Close"])
-            price = float(close.iloc[-1])
-            trend = detect_trend(close)
+            price = close.iloc[-1]
 
-            tp = price * (1 + TP_PCT / 100)
-            sl = price * (1 - SL_PCT / 100)
+            rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+            trend = detect_trend(close)
+            macd = detect_macd(close)
+            zone = detect_zone(df)
+
+            signal = "BUY" if (
+                trend == "Bullish" and
+                macd == "Bullish" and
+                zone == "BUY ZONE" and
+                rsi < 50
+            ) else "HOLD"
 
             rows.append({
-                "Kode": t,
-                "Harga": round(price, 2),
+                "Kode": t.replace(".JK",""),
+                "Harga": round(price,2),
+                "Signal": signal,
                 "Trend": trend,
-                "TP": round(tp, 2),
-                "SL": round(sl, 2),
-                "_df": df.copy()
+                "MACD": macd,
+                "Zone": zone,
+                "RSI": round(rsi,1),
+                "TP": round(price * (1 + TP_PCT/100),2),
+                "SL": round(price * (1 - SL_PCT/100),2),
             })
-
-        except Exception:
+        except:
             pass
 
 df = pd.DataFrame(rows)
+df = df.sort_values(["Signal","RSI"], ascending=[False,True])
 
 # =====================
-# SIDEBAR – HARGA WAJAR + S/R (FINAL FIX)
+# SIDEBAR – HARGA WAJAR
 # =====================
-st.sidebar.markdown("## 💎 Harga Wajar Saham")
+if show_fair_value and search_fair:
+    ticker = search_fair + ".JK"
+    row = df[df["Kode"] == search_fair]
 
-search = st.sidebar.text_input("🔍 Kode Saham", placeholder="BBRI / BBCA").upper()
+    st.sidebar.markdown("---")
+    if not row.empty:
+        price = row.iloc[0]["Harga"]
+        fv = fair_value_simple(ticker, price)
 
-if search:
-    ticker = search + ".JK"
-    row_df = df[df["Kode"] == ticker]
+        st.sidebar.metric("Harga Saat Ini", price)
 
-    if not row_df.empty:
-        row = row_df.iloc[0]
-        harga_now = float(row["Harga"])
-
-        st.sidebar.metric("Harga Saat Ini", harga_now)
-
-        # Support & Resistance
-        support, resistance = calculate_support_resistance(ticker)
-
-        if support is not None and resistance is not None:
-            support = float(support)
-            resistance = float(resistance)
-
-            st.sidebar.markdown("### 📐 Support & Resistance")
-            st.sidebar.metric("Support", round(support, 2))
-            st.sidebar.metric("Resistance", round(resistance, 2))
-
-            if harga_now <= support * 1.03:
-                st.sidebar.success("📍 Harga dekat SUPPORT")
-            elif harga_now >= resistance * 0.97:
-                st.sidebar.warning("📍 Harga dekat RESISTANCE")
-
-        # Fair Value
-        fv = calculate_fair_value_simple(ticker, harga_now)
         if fv:
-            st.sidebar.metric(
-                "Harga Wajar",
-                fv["Fair"],
-                delta=f"{fv['Margin']}%"
-            )
+            fair, margin = fv
+            st.sidebar.metric("Harga Wajar", fair, f"{margin}%")
 
-            if fv["Margin"] > 20:
+            if margin > 20:
                 st.sidebar.success("🟢 Undervalued")
-            elif fv["Margin"] < -10:
+            elif margin < -10:
                 st.sidebar.error("🔴 Overvalued")
             else:
                 st.sidebar.warning("🟡 Fair Value")
-
-            st.sidebar.caption(
-                f"Sektor: {fv['Sector']} • EPS: {fv['EPS']} • PER: {fv['PER']}"
-            )
-    else:
-        st.sidebar.info("Saham belum masuk scanner")
+        else:
+            st.sidebar.warning("EPS tidak tersedia")
 
 # =====================
 # TABLE
 # =====================
 st.subheader("📊 Hasil Scanner")
 
-if df.empty:
-    st.warning("Tidak ada data")
+st.dataframe(
+    df,
+    use_container_width=True,
+    hide_index=True
+)
+
+# =====================
+# TOP BUY
+# =====================
+st.subheader("🔥 TOP BUY")
+
+top_buy = df[df["Signal"] == "BUY"].head(10)
+if top_buy.empty:
+    st.info("Belum ada sinyal BUY kuat hari ini")
 else:
-    st.dataframe(
-        df[["Kode", "Harga", "Trend", "TP", "SL"]],
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(top_buy, use_container_width=True, hide_index=True)
 
 # =====================
 # FOOTER
 # =====================
-st.caption(
-    f"Auto Update • {datetime.now().strftime('%d %b %Y %H:%M')}"
-)
+st.caption(f"Update terakhir: {datetime.now().strftime('%d %b %Y %H:%M')}")
