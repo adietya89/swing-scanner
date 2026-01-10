@@ -624,7 +624,10 @@ for _, row in filtered_df.iterrows():
 # =====================
 st.subheader("🔥 TOP BUY (Ranking Terkuat)")
 
-top_buy = df[df["Signal"] == "BUY"].head(10)
+top_buy = filtered_df[
+    (filtered_df["Signal"] == "BUY") &
+    (filtered_df["BUY_Filter"] == True)
+].head(10)
 
 if top_buy.empty:
     st.info("Belum ada BUY signal kuat hari ini")
@@ -643,6 +646,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
