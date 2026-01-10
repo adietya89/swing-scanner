@@ -244,6 +244,21 @@ def plot_last_2_candles(df):
 
     return fig
 
+def calculate_support_resistance(df, window=20):
+    """
+    Hitung Support & Resistance sederhana
+    """
+    if df is None or df.empty or len(df) < window:
+        return None, None
+
+    low = df["Low"].astype(float)
+    high = df["High"].astype(float)
+
+    support = low.rolling(window).min().iloc[-1]
+    resistance = high.rolling(window).max().iloc[-1]
+
+    return round(support, 2), round(resistance, 2)
+
 # =====================
 # HELPER – HARGA WAJAR SIMPLE
 # =====================
@@ -476,10 +491,14 @@ if show_fair_value and fair_search:
     if not row.empty:
         row = row.iloc[0]
 
+        # ===== HARGA WAJAR =====
         fv = calculate_fair_value_simple(
             ticker_search,
             row["Harga"]
         )
+
+        # ===== SUPPORT & RESISTANCE =====
+        support, resistance = calculate_support_resistance(row["_df"])
 
         st.sidebar.markdown(f"### 📊 {fair_search}")
         st.sidebar.metric("Harga Saat Ini", row["Harga"])
@@ -497,12 +516,27 @@ if show_fair_value and fair_search:
                 st.sidebar.error("🔴 Overvalued")
             else:
                 st.sidebar.warning("🟡 Fair Value")
-
-            st.sidebar.caption(
-                f"Sektor: {fv['Sector']} • EPS: {fv['EPS']} • PER: {fv['PER_Sektor']}"
-            )
         else:
             st.sidebar.warning("EPS tidak tersedia")
+
+        # ===== TAMPIL SUPPORT & RESISTANCE =====
+        st.sidebar.markdown("### 🧱 Support & Resistance")
+
+        if support and resistance:
+            st.sidebar.metric("Support", support)
+            st.sidebar.metric("Resistance", resistance)
+
+            price = row["Harga"]
+
+            if price <= support * 1.03:
+                st.sidebar.success("📉 Harga dekat SUPPORT")
+            elif price >= resistance * 0.97:
+                st.sidebar.error("📈 Harga dekat RESISTANCE")
+            else:
+                st.sidebar.info("↔ Harga di tengah range")
+        else:
+            st.sidebar.warning("Data Support / Resistance tidak tersedia")
+
     else:
         st.sidebar.info("Saham belum masuk hasil scanner")
 
@@ -745,5 +779,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
