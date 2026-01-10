@@ -511,48 +511,6 @@ if show_fair_value and fair_search:
     else:
         st.sidebar.info("Saham belum masuk hasil scanner")
 
-# =====================
-# SIDEBAR OUTPUT – HARGA WAJAR
-# =====================
-if show_fair_value and fair_search:
-    ticker_search = fair_search + ".JK"
-    row = df[df["Kode"] == ticker_search]
-
-    st.sidebar.markdown("---")
-
-    if not row.empty:
-        row = row.iloc[0]
-        eps, fair_price, margin = calculate_fair_value(
-            ticker_search,
-            row["Harga"],
-            assumed_per
-        )
-
-        st.sidebar.markdown(f"### 📊 {fair_search}")
-        st.sidebar.metric("Harga Saat Ini", row["Harga"])
-
-        if fair_price:
-            st.sidebar.metric(
-                "Harga Wajar",
-                fair_price,
-                delta=f"{margin}%"
-            )
-
-            if margin > 20:
-                st.sidebar.success("🟢 Undervalued")
-            elif margin < -10:
-                st.sidebar.error("🔴 Overvalued")
-            else:
-                st.sidebar.warning("🟡 Fair Value")
-
-            st.sidebar.caption(
-                f"EPS: {eps} • PER Asumsi: {assumed_per}"
-            )
-        else:
-            st.sidebar.warning("Data EPS tidak tersedia")
-    else:
-        st.sidebar.info("Saham belum masuk hasil scanner")
-
 df["Fake_Rebound"] = df["Fake_Rebound"].astype(bool)
 df = df.sort_values(
     by=["Confidence", "Signal", "RSI"],
@@ -792,6 +750,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
