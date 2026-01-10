@@ -29,32 +29,19 @@ st.markdown("""
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
-
 .header-box {
     background: linear-gradient(135deg, #0e1117, #151b2c);
     padding: 20px;
     border-radius: 16px;
     margin-bottom: 25px;
 }
-
 [data-testid="stMetric"] {
     background-color: #0e1117;
     padding: 12px;
     border-radius: 10px;
 }
-
 .stProgress > div > div {
     background-color: #00c176;
-}
-
-/* ========================= */
-/* TAMBAHAN STEP 1 (PENTING) */
-/* ========================= */
-.table-cell {
-    height: 70px;                 /* tinggi baris */
-    display: flex;                /* aktifkan flexbox */
-    align-items: center;          /* tengah atas-bawah */
-    justify-content: center;      /* tengah kiri-kanan */
 }
 </style>
 """, unsafe_allow_html=True)
@@ -794,26 +781,17 @@ for _, row in filtered_df.iterrows():
     )
 
     with c1:
-        st.markdown(
-           f"<div class='table-cell'><b>{row['Kode'].replace('.JK','')}</b></div>",
-           unsafe_allow_html=True
-        )
+        st.write(row["Kode"].replace(".JK",""))
+
     with c2:
-        st.markdown(
-           f"<div class='table-cell'>{row['Harga']}</div>",
-           unsafe_allow_html=True
-        )
+        st.write(row["Harga"])
+
     with c3:
-       if row["Signal"] == "BUY":
-          st.markdown(
-            "<div class='table-cell' style='color:#00C176; font-weight:800'>BUY</div>",
-            unsafe_allow_html=True
-          )
-       else:
-          st.markdown(
-            "<div class='table-cell' style='color:#999'>HOLD</div>",
-            unsafe_allow_html=True
-          )
+        if row["Signal"] == "BUY":
+            st.markdown("<span style='color:#00C176; font-weight:bold'>BUY</span>", unsafe_allow_html=True)
+        else:
+            st.markdown("<span style='color:#999'>HOLD</span>", unsafe_allow_html=True)
+
     with c4:
         if row["Trend"] == "Bullish":
             st.markdown("<span style='font-size:13px; color:#00C176; font-weight:600'>🟢 Bullish</span>", unsafe_allow_html=True)
@@ -830,9 +808,7 @@ for _, row in filtered_df.iterrows():
 
     with c6:
         fig = plot_last_2_candles(row["_df"])
-        st.markdown("<div class='table-cell'>", unsafe_allow_html=True)
         st.pyplot(fig, clear_figure=True)
-        st.markdown("</div>", unsafe_allow_html=True)
 
     with c7:
         candle_pattern, bias = detect_candle(row["_df"])
@@ -954,10 +930,6 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
-
-
-
-
 
 
 
