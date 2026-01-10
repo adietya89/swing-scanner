@@ -158,6 +158,47 @@ show_fair_value = st.sidebar.checkbox(
 # =====================
 # HELPER (ANTI ERROR)
 # =====================
+def plot_price_fibo_snr(df, ticker):
+    import matplotlib.pyplot as plt
+
+    df = df.tail(120).copy()
+    close = df["Close"].astype(float)
+
+    # Ambil SNR & FIBO
+    support, resistance = calculate_support_resistance(df)
+    fib = calculate_fibonacci(df)
+
+    fig, ax = plt.subplots(figsize=(6, 3))
+
+    # Plot harga
+    ax.plot(close.index, close.values, color="black", linewidth=1.2, label="Price")
+
+    # Support & Resistance
+    if support:
+        ax.axhline(support, color="#00C176", linestyle="--", linewidth=1, label="Support")
+
+    if resistance:
+        ax.axhline(resistance, color="#FF4D4D", linestyle="--", linewidth=1, label="Resistance")
+
+    # Fibonacci Lines
+    if fib:
+        for level, price in fib.items():
+            ax.axhline(price, linestyle=":", linewidth=0.8, alpha=0.7)
+            ax.text(
+                close.index[-1],
+                price,
+                f"Fib {level}",
+                fontsize=7,
+                verticalalignment="center"
+            )
+
+    ax.set_title(f"{ticker.replace('.JK','')} • Price + Fibo + SNR", fontsize=10)
+    ax.legend(fontsize=7)
+    ax.grid(alpha=0.2)
+
+    plt.tight_layout()
+    return fig
+
 def calculate_fibonacci(df, lookback=60):
     if df is None or len(df) < lookback:
         return None
@@ -521,6 +562,12 @@ if show_fair_value and fair_search:
             row["Harga"]
         )
 
+        # ===== CHART FIBO + SNR =====
+        st.sidebar.markdown("### 📈 Chart Fibo & SNR")
+
+        fig = plot_price_fibo_snr(row["_df"], ticker_search)
+        st.sidebar.pyplot(fig)
+
         # ===== SUPPORT & RESISTANCE =====
         support, resistance = calculate_support_resistance(row["_df"])
 
@@ -803,6 +850,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
