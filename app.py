@@ -136,6 +136,13 @@ INTERVAL = "1d"
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
 st.sidebar.divider()
+
+scan_mode = st.sidebar.radio(
+    "⚡ Mode Scan",
+    ["Scan Cepat", "Scan Lengkap"],
+    index=0
+)
+
 run_scan = st.sidebar.button("🚀 Mulai Scan Saham")
 fake_rebound_filter = st.sidebar.checkbox(
     "Filter Fake Rebound",
@@ -328,6 +335,65 @@ def detect_fake_rebound(close, df):
         return True
     return False
 
+@st.cache_data(ttl=60*60*24)
+def scan_saham(tickers, scan_mode, TP_PCT, SL_PCT):
+    rows = []
+
+    for t in tickers:
+        try:
+            df = yf.download(t, period="6mo", interval="1d", progress=False)
+
+            if df.empty or len(df) < 60:
+                continue
+
+            df = df.dropna()
+            close = df["Close"]
+
+            price = close.iloc[-1]
+
+            # ===== MODE CEPAT =====
+            if scan_mode == "Scan Cepat":
+                rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+                trend = detect_trend(close)
+
+                rows.append({
+                    "Kode": t,
+                    "Harga": round(price, 2),
+                    "Trend": trend,
+                    "RSI": round(rsi, 1),
+                    "Signal": "BUY" if rsi < 40 and trend == "Bullish" else "HOLD",
+                    "_df": df
+                })
+
+            # ===== MODE LENGKAP =====
+            else:
+                macd_signal = detect_macd_signal(close)
+                zone = detect_zone(df)
+                candle, bias = detect_candle(df)
+                rsi = RSIIndicator(close, 14).rsi().iloc[-1]
+
+                tp = price * (1 + TP_PCT / 100)
+                sl = price * (1 - SL_PCT / 100)
+
+                rows.append({
+                    "Kode": t,
+                    "Harga": round(price, 2),
+                    "Trend": detect_trend(close),
+                    "Zone": zone,
+                    "Candle": candle,
+                    "RSI": round(rsi, 1),
+                    "MACD": macd_signal,
+                    "TP": round(tp, 2),
+                    "SL": round(sl, 2),
+                    "Signal": "BUY" if zone == "BUY ZONE" else "HOLD",
+                    "_df": df
+                })
+
+        except:
+            pass
+
+    return pd.DataFrame(rows)
+
 # =====================
 # DATA PROCESS
 # =====================
@@ -337,25 +403,13 @@ if not run_scan:
     st.info("👈 Klik tombol **Mulai Scan Saham** di kiri untuk mulai")
     st.stop()
 
-with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa menit !!! 😁😁😁"):
-    for t in TICKERS:
-        try:
-            df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-            if df.empty or len(df) < 60:
-                continue
+if not run_scan:
+    st.info("👈 Pilih mode scan lalu klik **Mulai Scan Saham**")
+    st.stop()
 
-            df = df.dropna()
-            close = S(df["Close"])
-            try:
-                intraday = yf.Ticker(t).history(period="1d", interval="1m")
-                if not intraday.empty:
-                   price = intraday["Close"].iloc[-1]
-                else:
-                   price = close.iloc[-1]
-            except Exception:
-                   price = close.iloc[-1]
+with st.spinner("⏳ Scan saham berjalan..."):
+    df = scan_saham(TICKERS, scan_mode, TP_PCT, SL_PCT)
+
             macd_signal = detect_macd_signal(close)
             dist_ma20 = distance_to_ma(close, 20)
             dist_ma50 = distance_to_ma(close, 50)
@@ -677,6 +731,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
