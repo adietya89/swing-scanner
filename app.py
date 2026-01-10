@@ -795,14 +795,28 @@ for _, row in filtered_df.iterrows():
             st.write("-")
             
     with c14:
-        score = row["Confidence"]
+         score = row["Confidence"]
 
-        if score >= 4:
-            st.markdown(f"<span style='color:#00C176; font-weight:700'>{score}</span>", unsafe_allow_html=True)
-        elif score == 3:
-            st.markdown(f"<span style='color:#FFA500; font-weight:700'>{score}</span>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<span style='color:#999; font-weight:700'>{score}</span>", unsafe_allow_html=True)
+         if score >= 4:
+            color = "#00C176"
+         elif score == 3:
+            color = "#FFA500"
+         else:
+            color = "#999"
+
+         st.markdown(
+            f"""
+            <div style="
+                 text-align: center;
+                 font-weight: 800;
+                 font-size: 15px;
+                 color: {color};
+            ">
+                 {score}
+            </div>
+            """,
+            unsafe_allow_html=True
+         )
      
 # =====================
 # BUY ONLY
@@ -831,6 +845,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
