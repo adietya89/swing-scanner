@@ -135,6 +135,8 @@ INTERVAL = "1d"
 
 TP_PCT = st.sidebar.slider("Take Profit (%)", 3, 20, 5)
 SL_PCT = st.sidebar.slider("Stop Loss (%)", 2, 10, 3)
+st.sidebar.divider()
+run_scan = st.sidebar.button("🚀 Mulai Scan Saham")
 fake_rebound_filter = st.sidebar.checkbox(
     "Filter Fake Rebound",
     value=False
@@ -330,6 +332,10 @@ def detect_fake_rebound(close, df):
 # DATA PROCESS
 # =====================
 rows = []
+
+if not run_scan:
+    st.info("👈 Klik tombol **Mulai Scan Saham** di kiri untuk mulai")
+    st.stop()
 
 with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa menit !!! 😁😁😁"):
     for t in TICKERS:
@@ -671,6 +677,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
