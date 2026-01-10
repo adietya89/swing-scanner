@@ -646,8 +646,8 @@ if df.empty:
     st.warning("Belum ada data")
 
 # Header tabel
-h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13 = st.columns(
-    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
+h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14 = st.columns(
+    [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1, 0.6]
 )
 
 h1.markdown("**Kode**")
@@ -663,6 +663,7 @@ h10.markdown("**RSI**")
 h11.markdown("**TP**")
 h12.markdown("**SL**")
 h13.markdown("**S'LINE**")
+h14.markdown("**CONF**")
 
 st.divider()
 
@@ -793,36 +794,16 @@ for _, row in filtered_df.iterrows():
         except Exception:
             st.write("-")
             
-# =====================
-# CONFIDENCE METER
-# =====================
-st.subheader("🎯 Confidence Meter")
+    with c14:
+        score = row["Confidence"]
 
-for _, row in filtered_df.iterrows():
-    score = row["Confidence"]
-
-    col1, col2 = st.columns([1.2, 4])
-
-    with col1:
-        st.markdown(f"**{row['Kode'].replace('.JK','')}**")
-        if row["Signal"] == "BUY":
-            st.markdown("🟢 **BUY**")
-        else:
-            st.markdown("⚪ HOLD")
-
-    with col2:
-        st.progress(score / 4)
-
-        if score == 4:
-            st.caption("🔥 Sangat Kuat (4/4 indikator)")
+        if score >= 4:
+            st.markdown(f"<span style='color:#00C176; font-weight:700'>{score}</span>", unsafe_allow_html=True)
         elif score == 3:
-            st.caption("✅ Kuat (3/4 indikator)")
-        elif score == 2:
-            st.caption("⚠ Cukup (2/4 indikator)")
+            st.markdown(f"<span style='color:#FFA500; font-weight:700'>{score}</span>", unsafe_allow_html=True)
         else:
-            st.caption("❌ Lemah (<2 indikator)")
-
-
+            st.markdown(f"<span style='color:#999; font-weight:700'>{score}</span>", unsafe_allow_html=True)
+     
 # =====================
 # BUY ONLY
 # =====================
@@ -850,6 +831,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
