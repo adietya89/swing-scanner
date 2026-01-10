@@ -795,7 +795,7 @@ for _, row in filtered_df.iterrows():
             st.write("-")
             
     with c14:
-         score = row["Confidence"]
+         score = int(row["Confidence"])
 
          if score >= 4:
             color = "#00C176"
@@ -845,6 +845,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
