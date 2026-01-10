@@ -146,16 +146,16 @@ menu_option = st.sidebar.radio(
     "📋 Pilih Menu",
     ["Harga Wajar", "Average Down"]
 )
+if menu_option == "Harga Wajar":
+   fair_search = st.sidebar.text_input(
+       "🔍 Cari Kode Saham",
+       placeholder="BBRI / BBCA / TLKM"
+   ).upper()
 
-fair_search = st.sidebar.text_input(
-    "🔍 Cari Kode Saham",
-    placeholder="BBRI / BBCA / TLKM"
-).upper()
-
-show_fair_value = st.sidebar.checkbox(
-    "Tampilkan Analisa Harga Wajar",
-    value=True
-)
+   show_fair_value = st.sidebar.checkbox(
+       "Tampilkan Analisa Harga Wajar",
+       value=True
+   )
 
 elif menu_option == "Average Down":
     st.sidebar.markdown("## 📌 Average Down (AVD)")
@@ -904,6 +904,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
