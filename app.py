@@ -80,7 +80,7 @@ with col1:
     st.markdown(
         """
         <div style="
-            background-color: white;
+            background-color: #0e1117;
             padding: 10px;
             border-radius: 12px;
         ">
@@ -918,6 +918,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
