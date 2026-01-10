@@ -691,8 +691,8 @@ if fake_rebound_filter:
     filtered_df = filtered_df[filtered_df["Fake_Rebound"] == False]
 
 for _, row in filtered_df.iterrows():
-    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13 = st.columns(
-        [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1]
+    c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14 = st.columns(
+        [1.2, 1, 1, 1, 1, 0.8, 1.2, 1.2, 1.2, 1, 1, 1, 1, 0.6]
     )
 
     with c1:
@@ -831,6 +831,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
