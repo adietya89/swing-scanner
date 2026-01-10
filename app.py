@@ -165,6 +165,21 @@ elif menu_option == "Average Down":
         placeholder="BBRI / BBCA / TLKM"
     ).upper()
 
+    # Harga beli awal
+    initial_price = st.sidebar.number_input(
+        "Harga Beli Awal",
+        value=0.0,
+        step=100.0,
+        format="%.2f"
+    )
+
+    initial_lot = st.sidebar.number_input(
+        "Lot Awal",
+        value=0,
+        step=1
+    )
+
+    # Harga setelah average down
     avd_price = st.sidebar.number_input(
         "Harga Terakhir Setelah Average Down",
         value=0.0,
@@ -173,17 +188,23 @@ elif menu_option == "Average Down":
     )
 
     avd_lot = st.sidebar.number_input(
-        "Jumlah Lot",
+        "Lot Tambahan",
         value=0,
         step=1
     )
+    # =====================
+    # HITUNG HARGA RATA-RATA & TOTAL LOT
+    # =====================
+    if (initial_price > 0 and initial_lot > 0) or (avd_price > 0 and avd_lot > 0):
+        total_lot = initial_lot + avd_lot
+        if total_lot > 0:
+            avg_price = (initial_price * initial_lot + avd_price * avd_lot) / total_lot
+        else:
+            avg_price = 0
 
-    if avd_price > 0 and avd_lot > 0:
-        st.sidebar.markdown(f"💹 Harga Terakhir: **{avd_price}**")
-        st.sidebar.markdown(f"📦 Lot: **{avd_lot}**")
-    else:
-        st.sidebar.info("Isi harga dan lot untuk melihat detail")
-
+        st.sidebar.markdown(f"💹 Harga Rata-rata: **{round(avg_price, 2)}**")
+        st.sidebar.markdown(f"📦 Total Lot: **{total_lot}**")
+        
 # =====================
 # HELPER (ANTI ERROR)
 # =====================
@@ -904,6 +925,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
