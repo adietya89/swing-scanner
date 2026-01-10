@@ -216,11 +216,17 @@ def calculate_fibonacci(df, lookback=60):
     return fib
 
 def distance_to_ma(close, period):
-    if len(close) < period:
+    try:
+        close = close.astype(float)
+        if len(close) < period:
+            return np.nan
+
+        ma = float(close.rolling(period).mean().iloc[-1])
+        price = float(close.iloc[-1])
+
+        return abs(price - ma) / ma * 100
+    except Exception:
         return np.nan
-    ma = close.rolling(period).mean().iloc[-1]
-    price = close.iloc[-1]
-    return abs(price - ma) / ma * 100
 
 def S(x):
     if isinstance(x, pd.DataFrame):
@@ -465,6 +471,14 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
     for t in TICKERS:
         try:
             df = yf.download(t, period=PERIOD, interval=INTERVAL, progress=False)
+            # ===== FIX DATA CACAT =====
+            df = df.copy()
+            for col in ["Open", "High", "Low", "Close", "Volume"]:
+                if col in df.columns:
+                   df[col] = pd.to_numeric(df[col], errors="coerce")
+
+            df = df.dropna(subset=["Open", "High", "Low", "Close"])
+
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
             if df.empty or len(df) < 60:
@@ -483,9 +497,11 @@ with st.spinner("⏳ Mengambil dari data saham IDX ... Mohon tunggu beberapa men
             macd_signal = detect_macd_signal(close)
             dist_ma20 = distance_to_ma(close, 20)
             dist_ma50 = distance_to_ma(close, 50)
-            nearest_ma_dist = np.nanmin([dist_ma20, dist_ma50])
+            nearest_ma_dist = np.nanmin([
+                float(dist_ma20) if np.isscalar(dist_ma20) else np.nan,
+                float(dist_ma50) if np.isscalar(dist_ma50) else np.nan
+            ])
             ma_pos = detect_ma_position(close)
-
             trend = detect_trend(close)
             zone = detect_zone(df)
             candle, bias = detect_candle(df)
@@ -845,6 +861,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
