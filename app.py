@@ -514,7 +514,7 @@ if show_fair_value and fair_search:
             ticker_search
         )
 
-        if support and resistance:
+        if support is not None and resistance is not None:
             st.sidebar.markdown("**📐 Support & Resistance (20 hari)**")
 
             st.sidebar.metric("Support", support)
@@ -787,6 +787,7 @@ else:
 st.caption(
     f"Update otomatis harian • Last update: {datetime.now().strftime('%d %b %Y %H:%M')}"
 )
+
 
 
 
